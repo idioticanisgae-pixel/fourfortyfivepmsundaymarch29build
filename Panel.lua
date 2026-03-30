@@ -1,6 +1,4 @@
 --[[Made By Zuka]]
-warn("best panel on god")
-
 if getgenv().ZukaTech_Loaded then
     return
 end
@@ -35633,7 +35631,7 @@ function Modules.AutoLoadDex:Execute()
   if self.State.IsLoaded then return end
   task.delay(self.Config.DelayTime, function()
       local success, err = pcall(function()
-          loadstring(game:HttpGet("https://raw.githubusercontent.com/idioticanisgae-pixel/Random/refs/heads/main/dex.lua"))()
+          loadstring(game:HttpGet("https://raw.githubusercontent.com/idioticanisgae-pixel/fourfortyfivepmsundaymarch29build/refs/heads/main/BetterDex.lua"))()
       end)
 end)
 end
