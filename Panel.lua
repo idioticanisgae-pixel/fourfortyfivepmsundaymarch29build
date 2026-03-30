@@ -1,5 +1,5 @@
 --[[Made By Zuka]]
-
+warn("best panel on god")
 
 if getgenv().ZukaTech_Loaded then
     return
@@ -35488,6 +35488,10 @@ Permissions = {},
                 local module = require(setting)
                 if setreadonly then setreadonly(module, false) end
                 module.LaserTrailConstantDamage = 999999
+                module.Debuff = true
+                module.DebuffName = "IgniteScript"
+                module.DebuffChance = 100
+                module.IgnoreBlacklistedParts = true
                 module.PenetrationIgnoreDelay = 0
                 module.AngleX_Min = 0
                 module.Spread = 0
@@ -35519,13 +35523,16 @@ Permissions = {},
                 module.ReloadTime = 0
                 module.DamageBasedOnDistance = 999999
                 module.SwitchTime = 0
-                module.FriendlyFire = false
+                module.FriendlyFire = true
                 module.BulletPerShot = 15
                 module.FullDamageDistance = 999999
                 module.SilenceEffect = false
                 module.HeadshotDamageMultiplier = 999999
                 module.Accuracy = 0
-                module.AngleX_Max = 0
+                module.ExplosiveEnabled = false
+                module.ShotgunPattern = false
+                module.LightRange = 20
+                module.LightColor = 255, 255, 255
                 module.SelfDamageRedution = 999999
                 if setreadonly then setreadonly(module, true) end
                 print(' Zuka : ' .. weapon.Name .. ' modified ')
