@@ -17,6 +17,14 @@ local function getLocalPlayer()
     end
     return lp
 end
+
+
+
+
+
+
+
+
 local Workspace = game:GetService("Workspace")
 local ContentProvider = game:GetService("ContentProvider")
 local RunService = game:GetService("RunService")
