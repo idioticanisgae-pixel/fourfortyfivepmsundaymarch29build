@@ -10332,6 +10332,501 @@ RegisterCommand({
 }, function()
     Modules.CFrameEditor:Toggle()
 end)
+RegisterCommand({
+    Name        = "charmover",
+    Aliases     = {"cha"},
+    Description = "Moves your characters serverside character around. basically position spoofer.",
+    ArgsDesc    = {},
+    Permissions = {},
+}, function(args, speaker)
+    local CFrameDesync = {
+        State = {
+            IsEnabled      = false,
+            DesyncActive   = false,
+            RealCFrame     = CFrame.new(),
+            VisualOffset   = CFrame.new(),
+            UI             = nil,
+            Mode           = "position",
+            Increment      = 1,
+            Connections    = {},
+            FakeCharacter  = nil,
+            GhostHighlight = nil,
+            PinnedParts    = {},
+        },
+        Config = {
+            HighlightColor    = Color3.fromRGB(255, 0, 200),
+            PinnedColor       = Color3.fromRGB(0, 220, 255),
+            ShowFakeCharacter = true,
+        },
+    }
+    local PART_GROUPS = {
+        { label = "HEAD",      parts = { "Head" } },
+        { label = "TORSO",     parts = { "UpperTorso", "LowerTorso", "Torso" } },
+        { label = "LEFT ARM",  parts = { "LeftUpperArm", "LeftLowerArm", "LeftHand", "Left Arm" } },
+        { label = "RIGHT ARM", parts = { "RightUpperArm", "RightLowerArm", "RightHand", "Right Arm" } },
+        { label = "LEFT LEG",  parts = { "LeftUpperLeg", "LeftLowerLeg", "LeftFoot", "Left Leg" } },
+        { label = "RIGHT LEG", parts = { "RightUpperLeg", "RightLowerLeg", "RightFoot", "Right Leg" } },
+    }
+    local RunService       = game:GetService("RunService")
+    local Players          = game:GetService("Players")
+    local CoreGui          = game:GetService("CoreGui")
+    local UserInputService = game:GetService("UserInputService")
+    local LocalPlayer      = Players.LocalPlayer
+    local function getChar()
+        local char = LocalPlayer.Character
+        local hrp  = char and char:FindFirstChild("HumanoidRootPart")
+        local hum  = char and char:FindFirstChild("Humanoid")
+        return char, hrp, hum
+    end
+    local function isPinned(self, partName)
+        return self.State.PinnedParts[partName] == true
+    end
+    function CFrameDesync:ActivateDesync()
+        local char, hrp = getChar()
+        if not hrp then warn("[CFrameDesync] No character.") return end
+        self.State.DesyncActive = true
+        self.State.RealCFrame   = hrp.CFrame
+        if self.Config.ShowFakeCharacter then
+            self:CreateFakeCharacter()
+        end
+        self.State.Connections.Heartbeat = RunService.Heartbeat:Connect(function()
+            local _, root = getChar()
+            if not root then return end
+            self.State.RealCFrame = root.CFrame
+            local rotOnly = CFrame.fromMatrix(
+                Vector3.zero,
+                self.State.VisualOffset.RightVector,
+                self.State.VisualOffset.UpVector,
+                -self.State.VisualOffset.LookVector
+            )
+            local spoof = CFrame.new(root.CFrame.Position + self.State.VisualOffset.Position)
+                        * CFrame.fromMatrix(Vector3.zero, root.CFrame.RightVector, root.CFrame.UpVector, -root.CFrame.LookVector)
+                        * rotOnly
+            root.CFrame = spoof
+        end)
+        self.State.Connections.RenderStepped = RunService.RenderStepped:Connect(function()
+            local _, root = getChar()
+            if not root then return end
+            root.CFrame = self.State.RealCFrame
+            self:UpdateVisuals()
+        end)
+        local camera = workspace.CurrentCamera
+        local savedCameraType = camera.CameraType
+        camera.CameraType = Enum.CameraType.Custom
+        self.State.SavedCameraType = savedCameraType
+        local camAnchor = Instance.new("Part")
+        camAnchor.Name        = "DesyncCamAnchor"
+        camAnchor.Size        = Vector3.new(0.1, 0.1, 0.1)
+        camAnchor.Transparency = 1
+        camAnchor.CanCollide  = false
+        camAnchor.CanTouch    = false
+        camAnchor.CanQuery    = false
+        camAnchor.Anchored    = true
+        camAnchor.CFrame      = self.State.RealCFrame
+        camAnchor.Parent      = workspace
+        self.State.CamAnchor  = camAnchor
+        camera.CameraSubject  = camAnchor
+        self.State.Connections.CamAnchor = RunService.RenderStepped:Connect(function()
+            if camAnchor and camAnchor.Parent then
+                camAnchor.CFrame = self.State.RealCFrame
+            end
+        end)
+        local ui = self.State.UI.MainFrame
+        ui.Content.DesyncToggle.Text             = "DEACTIVATE DESYNC"
+        ui.Content.DesyncToggle.BackgroundColor3 = Color3.fromRGB(110, 25, 45)
+        ui.TitleBar.StatusIndicator.Text             = "ONLINE"
+        ui.TitleBar.StatusIndicator.BackgroundColor3 = self.Config.HighlightColor
+        ui.TitleBar.StatusIndicator.TextColor3       = Color3.fromRGB(10, 10, 20)
+        self:UpdateDisplay()
+    end
+    function CFrameDesync:DeactivateDesync()
+        self.State.DesyncActive = false
+        for _, conn in pairs(self.State.Connections) do conn:Disconnect() end
+        table.clear(self.State.Connections)
+        if self.State.FakeCharacter then
+            self.State.FakeCharacter:Destroy()
+            self.State.FakeCharacter  = nil
+            self.State.GhostHighlight = nil
+        end
+        local camera = workspace.CurrentCamera
+        local char, hrp = getChar()
+        if hrp then
+            camera.CameraSubject = hrp
+        elseif char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then camera.CameraSubject = hum end
+        end
+        if self.State.CamAnchor then
+            self.State.CamAnchor:Destroy()
+            self.State.CamAnchor = nil
+        end
+        if not self.State.UI then return end
+        local ui = self.State.UI.MainFrame
+        ui.Content.DesyncToggle.Text             = "ACTIVATE DESYNC"
+        ui.Content.DesyncToggle.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+        ui.TitleBar.StatusIndicator.Text             = "OFFLINE"
+        ui.TitleBar.StatusIndicator.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+        ui.TitleBar.StatusIndicator.TextColor3       = Color3.fromRGB(160, 160, 160)
+        self:UpdateDisplay()
+    end
+    function CFrameDesync:ToggleDesync()
+        if self.State.DesyncActive then self:DeactivateDesync() else self:ActivateDesync() end
+    end
+    function CFrameDesync:CreateFakeCharacter()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local fake = Instance.new("Model")
+        fake.Name = "Desync_Visualizer"
+        for _, part in pairs(char:GetChildren()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                local p = part:Clone()
+                p.CanCollide  = false
+                p.CanTouch    = false
+                p.CanQuery    = false
+                p.CastShadow  = false
+                p.Material    = Enum.Material.Neon
+                p.Transparency = isPinned(self, part.Name) and 0.45 or 0.2
+                p.Color       = isPinned(self, part.Name)
+                    and self.Config.PinnedColor or self.Config.HighlightColor
+                p.Parent = fake
+                for _, child in pairs(p:GetChildren()) do
+                    if not child:IsA("SpecialMesh") then child:Destroy() end
+                end
+            end
+        end
+        local hl = Instance.new("Highlight", fake)
+        hl.FillColor           = self.Config.HighlightColor
+        hl.OutlineColor        = Color3.new(1, 1, 1)
+        hl.FillTransparency    = 0.4
+        hl.OutlineTransparency = 0.0
+        hl.DepthMode           = Enum.HighlightDepthMode.AlwaysOnTop
+        self.State.GhostHighlight = hl
+        fake.Parent = workspace
+        self.State.FakeCharacter = fake
+    end
+    function CFrameDesync:_refreshFakeCharacterColors()
+        if not self.State.FakeCharacter then return end
+        for _, part in pairs(self.State.FakeCharacter:GetChildren()) do
+            if part:IsA("BasePart") then
+                local pinned = isPinned(self, part.Name)
+                part.Color        = pinned and self.Config.PinnedColor or self.Config.HighlightColor
+                part.Transparency = pinned and 0.45 or 0.2
+            end
+        end
+        if self.State.GhostHighlight then
+            self.State.GhostHighlight.FillColor = self.Config.HighlightColor
+        end
+    end
+    function CFrameDesync:UpdateVisuals()
+        local char = LocalPlayer.Character
+        if not char or not self.State.FakeCharacter then return end
+        local realHRP = char:FindFirstChild("HumanoidRootPart")
+        if not realHRP then return end
+        local rotOnly = CFrame.fromMatrix(
+            Vector3.zero,
+            self.State.VisualOffset.RightVector,
+            self.State.VisualOffset.UpVector,
+            -self.State.VisualOffset.LookVector
+        )
+        local spoof = CFrame.new(self.State.RealCFrame.Position + self.State.VisualOffset.Position)
+                    * CFrame.fromMatrix(Vector3.zero,
+                        self.State.RealCFrame.RightVector,
+                        self.State.RealCFrame.UpVector,
+                        -self.State.RealCFrame.LookVector)
+                    * rotOnly
+        for _, part in pairs(self.State.FakeCharacter:GetChildren()) do
+            if part:IsA("BasePart") then
+                local realPart = char:FindFirstChild(part.Name)
+                if realPart then
+                    local relative = realHRP.CFrame:Inverse() * realPart.CFrame
+                    if isPinned(self, part.Name) then
+                        part.CFrame = self.State.RealCFrame * relative
+                    else
+                        part.CFrame = spoof * relative
+                    end
+                end
+            end
+        end
+    end
+    function CFrameDesync:AdjustOffset(vec)
+        local inc = self.State.Increment
+        if self.State.Mode == "position" then
+            local cur = self.State.VisualOffset.Position
+            self.State.VisualOffset = CFrame.new(cur + vec * inc)
+        else
+            local r = vec * math.rad(inc * 5)
+            self.State.VisualOffset = self.State.VisualOffset * CFrame.Angles(r.X, r.Y, r.Z)
+        end
+        self:UpdateDisplay()
+    end
+    function CFrameDesync:UpdateDisplay()
+        if not self.State.UI then return end
+        local info = self.State.UI.MainFrame.Content.InfoBox
+        if not info then return end
+        if not self.State.DesyncActive then
+            info.Text = "STATUS: INACTIVE\nAWAITING ACTIVATION..."
+            return
+        end
+        local pinnedCount = 0
+        for _, v in pairs(self.State.PinnedParts) do if v then pinnedCount += 1 end end
+        local pos = self.State.VisualOffset.Position
+        local rx, ry, rz = self.State.VisualOffset:ToEulerAnglesXYZ()
+        info.Text = string.format(
+            "STATUS: DESYNCED  |  PINNED: %d PARTS\n\nSPOOF OFFSET:\n  X: %.2f  |  Y: %.2f  |  Z: %.2f\n\nROT OFFSET:\n  X: %.1f\xc2\xb0  |  Y: %.1f\xc2\xb0  |  Z: %.1f\xc2\xb0",
+            pinnedCount, pos.X, pos.Y, pos.Z,
+            math.deg(rx), math.deg(ry), math.deg(rz)
+        )
+    end
+    function CFrameDesync:_createUI()
+        local existing = CoreGui:FindFirstChild("CFrameDesync_SA")
+        if existing then existing:Destroy() end
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Name           = "CFrameDesync_SA"
+        screenGui.ResetOnSpawn   = false
+        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+        screenGui.DisplayOrder   = 9999
+        self.State.UI = screenGui
+        local mainFrame = Instance.new("Frame")
+        mainFrame.Name             = "MainFrame"
+        mainFrame.Size             = UDim2.fromOffset(360, 640)
+        mainFrame.Position         = UDim2.new(1, -375, 0.5, -320)
+        mainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+        mainFrame.BorderSizePixel  = 0
+        mainFrame.ClipsDescendants = false
+        mainFrame.Parent           = screenGui
+        Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
+        local stroke = Instance.new("UIStroke", mainFrame)
+        stroke.Color = self.Config.HighlightColor; stroke.Thickness = 1.5
+        local titleBar = Instance.new("Frame", mainFrame)
+        titleBar.Name = "TitleBar"; titleBar.Size = UDim2.new(1,0,0,38)
+        titleBar.BackgroundColor3 = Color3.fromRGB(8,8,14); titleBar.BorderSizePixel = 0
+        Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0,10)
+        local title = Instance.new("TextLabel", titleBar)
+        title.Size = UDim2.new(1,-110,1,0); title.Position = UDim2.fromOffset(12,0)
+        title.BackgroundTransparency = 1; title.Font = Enum.Font.Code
+        title.Text = "▸ CFRAME DESYNC  //  STANDALONE"
+        title.TextColor3 = self.Config.HighlightColor; title.TextSize = 13
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        local si = Instance.new("TextLabel", titleBar)
+        si.Name = "StatusIndicator"; si.Size = UDim2.fromOffset(70,20)
+        si.Position = UDim2.new(1,-82,0.5,-10)
+        si.BackgroundColor3 = Color3.fromRGB(35,35,42); si.Font = Enum.Font.GothamBold
+        si.Text = "OFFLINE"; si.TextColor3 = Color3.fromRGB(160,160,160); si.TextSize = 10
+        Instance.new("UICorner", si).CornerRadius = UDim.new(0,4)
+        local dragging, dragStart, startPos
+        titleBar.InputBegan:Connect(function(inp)
+            if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true; dragStart = inp.Position; startPos = mainFrame.Position
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(inp)
+            if dragging and inp.UserInputType == Enum.UserInputType.MouseMovement then
+                local d = inp.Position - dragStart
+                mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset+d.X, startPos.Y.Scale, startPos.Y.Offset+d.Y)
+            end
+        end)
+        titleBar.InputEnded:Connect(function(inp)
+            if inp.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        end)
+        local scroll = Instance.new("ScrollingFrame", mainFrame)
+        scroll.Name = "Content"; scroll.Size = UDim2.new(1,-16,1,-48)
+        scroll.Position = UDim2.fromOffset(8,44); scroll.BackgroundTransparency = 1
+        scroll.BorderSizePixel = 0; scroll.ScrollBarThickness = 3
+        scroll.ScrollBarImageColor3 = self.Config.HighlightColor
+        scroll.CanvasSize = UDim2.fromOffset(0,0); scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        local layout = Instance.new("UIListLayout", scroll)
+        layout.Padding = UDim.new(0,8); layout.FillDirection = Enum.FillDirection.Vertical
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        local function sectionLabel(text, order)
+            local l = Instance.new("TextLabel", scroll)
+            l.LayoutOrder = order; l.Size = UDim2.new(1,-8,0,18)
+            l.BackgroundTransparency = 1; l.Text = text
+            l.TextColor3 = Color3.fromRGB(130,130,150); l.Font = Enum.Font.Code
+            l.TextSize = 11; l.TextXAlignment = Enum.TextXAlignment.Left
+        end
+        local function bigBtn(text, color, order, name)
+            local b = Instance.new("TextButton", scroll)
+            b.LayoutOrder = order; b.Size = UDim2.new(1,-8,0,40)
+            b.BackgroundColor3 = color; b.Font = Enum.Font.GothamBold
+            b.Text = text; b.TextColor3 = Color3.new(1,1,1); b.TextSize = 13
+            b.BorderSizePixel = 0; if name then b.Name = name end
+            Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+            return b
+        end
+        local tog = bigBtn("ACTIVATE DESYNC", Color3.fromRGB(35,35,50), 10, "DesyncToggle")
+        local ts = Instance.new("UIStroke", tog); ts.Color = self.Config.HighlightColor; ts.Thickness = 1
+        tog.MouseButton1Click:Connect(function() self:ToggleDesync() end)
+        sectionLabel("MANIPULATION MODE", 20)
+        local modeRow = Instance.new("Frame", scroll)
+        modeRow.LayoutOrder = 21; modeRow.Size = UDim2.new(1,-8,0,34); modeRow.BackgroundTransparency = 1
+        local ml = Instance.new("UIListLayout", modeRow); ml.FillDirection = Enum.FillDirection.Horizontal; ml.Padding = UDim.new(0,6)
+        local modeButtons = {}
+        for _, mode in ipairs({"POSITION","ROTATION"}) do
+            local b = Instance.new("TextButton", modeRow)
+            b.Size = UDim2.new(0.5,-3,1,0)
+            b.BackgroundColor3 = (mode:lower()==self.State.Mode) and self.Config.HighlightColor or Color3.fromRGB(28,28,38)
+            b.Font = Enum.Font.GothamBold; b.Text = mode; b.TextColor3 = Color3.new(1,1,1)
+            b.TextSize = 12; b.BorderSizePixel = 0
+            Instance.new("UICorner", b).CornerRadius = UDim.new(0,5)
+            modeButtons[mode:lower()] = b
+            b.MouseButton1Click:Connect(function()
+                self.State.Mode = mode:lower()
+                for m, btn in pairs(modeButtons) do
+                    btn.BackgroundColor3 = m==self.State.Mode and self.Config.HighlightColor or Color3.fromRGB(28,28,38)
+                end
+            end)
+        end
+        sectionLabel("INCREMENT VALUE", 30)
+        local inc = Instance.new("TextBox", scroll)
+        inc.LayoutOrder = 31; inc.Size = UDim2.new(1,-8,0,34)
+        inc.BackgroundColor3 = Color3.fromRGB(18,18,26); inc.Text = "1"
+        inc.TextColor3 = Color3.new(1,1,1); inc.Font = Enum.Font.Code; inc.TextSize = 13
+        inc.PlaceholderText = "Enter increment..."; inc.PlaceholderColor3 = Color3.fromRGB(80,80,100)
+        inc.BorderSizePixel = 0
+        Instance.new("UICorner", inc).CornerRadius = UDim.new(0,5)
+        Instance.new("UIStroke", inc).Color = Color3.fromRGB(40,40,55)
+        inc.FocusLost:Connect(function()
+            local v = tonumber(inc.Text)
+            if v and v > 0 then self.State.Increment = v else inc.Text = tostring(self.State.Increment) end
+        end)
+        sectionLabel("SPOOF OFFSET CONTROLS", 40)
+        local grid = Instance.new("Frame", scroll)
+        grid.LayoutOrder = 41; grid.Size = UDim2.new(1,-8,0,76); grid.BackgroundTransparency = 1
+        local axes = {
+            {t="+X",o=Vector3.new(1,0,0)},{t="-X",o=Vector3.new(-1,0,0)},
+            {t="+Y",o=Vector3.new(0,1,0)},{t="-Y",o=Vector3.new(0,-1,0)},
+            {t="+Z",o=Vector3.new(0,0,1)},{t="-Z",o=Vector3.new(0,0,-1)},
+        }
+        local axColors = {
+            Color3.fromRGB(180,60,60),Color3.fromRGB(130,30,30),
+            Color3.fromRGB(60,180,60),Color3.fromRGB(30,130,30),
+            Color3.fromRGB(60,60,180),Color3.fromRGB(30,30,130),
+        }
+        for i, ax in ipairs(axes) do
+            local c=(i-1)%3; local r=math.floor((i-1)/3)
+            local b = Instance.new("TextButton", grid)
+            b.Size = UDim2.fromOffset(106,34); b.Position = UDim2.fromOffset(c*112, r*40)
+            b.BackgroundColor3 = axColors[i]; b.Font = Enum.Font.GothamBold
+            b.Text = ax.t; b.TextColor3 = Color3.new(1,1,1); b.TextSize = 13; b.BorderSizePixel = 0
+            Instance.new("UICorner", b).CornerRadius = UDim.new(0,5)
+            local vec = ax.o
+            b.MouseButton1Click:Connect(function() self:AdjustOffset(vec) end)
+        end
+        local rst = bigBtn("↺  RESET OFFSET", Color3.fromRGB(70,30,30), 50)
+        rst.MouseButton1Click:Connect(function()
+            self.State.VisualOffset = CFrame.new(); self:UpdateDisplay()
+        end)
+        sectionLabel("PART PIN CONTROL  (CYAN = PINNED / STAYS AT REAL POS IN GHOST)", 60)
+        local pinButtons = {}
+        for gi, group in ipairs(PART_GROUPS) do
+            local row = Instance.new("Frame", scroll)
+            row.LayoutOrder = 60+gi; row.Size = UDim2.new(1,-8,0,34); row.BackgroundTransparency = 1
+            local rl = Instance.new("UIListLayout", row)
+            rl.FillDirection = Enum.FillDirection.Horizontal; rl.Padding = UDim.new(0,6)
+            rl.VerticalAlignment = Enum.VerticalAlignment.Center
+            local lbl = Instance.new("TextLabel", row)
+            lbl.Size = UDim2.new(0.42,0,1,0); lbl.BackgroundTransparency = 1
+            lbl.Text = group.label; lbl.Font = Enum.Font.Code
+            lbl.TextColor3 = Color3.fromRGB(200,200,210); lbl.TextSize = 11
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+            local pb = Instance.new("TextButton", row)
+            pb.Size = UDim2.new(0.58,-6,0.9,0); pb.BackgroundColor3 = Color3.fromRGB(28,28,38)
+            pb.Font = Enum.Font.GothamBold; pb.Text = "FREE"
+            pb.TextColor3 = Color3.fromRGB(160,160,170); pb.TextSize = 11; pb.BorderSizePixel = 0
+            Instance.new("UICorner", pb).CornerRadius = UDim.new(0,5)
+            pinButtons[gi] = {btn=pb, group=group}
+            local function refreshBtn(pinned)
+                if pinned then
+                    pb.BackgroundColor3 = self.Config.PinnedColor
+                    pb.TextColor3 = Color3.fromRGB(5,5,15); pb.Text = "PINNED"
+                else
+                    pb.BackgroundColor3 = Color3.fromRGB(28,28,38)
+                    pb.TextColor3 = Color3.fromRGB(160,160,170); pb.Text = "FREE"
+                end
+            end
+            local function groupPinned()
+                for _, p in ipairs(group.parts) do if not self.State.PinnedParts[p] then return false end end
+                return true
+            end
+            refreshBtn(groupPinned())
+            pb.MouseButton1Click:Connect(function()
+                local now = groupPinned()
+                for _, p in ipairs(group.parts) do self.State.PinnedParts[p] = not now end
+                refreshBtn(not now)
+                if self.State.FakeCharacter then self:_refreshFakeCharacterColors() end
+            end)
+        end
+        sectionLabel("QUICK PRESETS", 80)
+        local presetRow = Instance.new("Frame", scroll)
+        presetRow.LayoutOrder = 81; presetRow.Size = UDim2.new(1,-8,0,34); presetRow.BackgroundTransparency = 1
+        local pl = Instance.new("UIListLayout", presetRow); pl.FillDirection = Enum.FillDirection.Horizontal; pl.Padding = UDim.new(0,6)
+        local presets = {
+            {label="PIN ARMS", pinned={["LEFT ARM"]=true,["RIGHT ARM"]=true}},
+            {label="PIN LEGS", pinned={["LEFT LEG"]=true,["RIGHT LEG"]=true}},
+            {label="ALL FREE", pinned={}},
+            {label="ALL PIN",  pinned={["HEAD"]=true,["TORSO"]=true,["LEFT ARM"]=true,["RIGHT ARM"]=true,["LEFT LEG"]=true,["RIGHT LEG"]=true}},
+        }
+        for _, preset in ipairs(presets) do
+            local pb = Instance.new("TextButton", presetRow)
+            pb.Size = UDim2.new(0.25,-5,1,0); pb.BackgroundColor3 = Color3.fromRGB(22,22,32)
+            pb.Font = Enum.Font.GothamBold; pb.Text = preset.label
+            pb.TextColor3 = Color3.fromRGB(180,180,200); pb.TextSize = 9; pb.BorderSizePixel = 0
+            Instance.new("UICorner", pb).CornerRadius = UDim.new(0,5)
+            Instance.new("UIStroke", pb).Color = Color3.fromRGB(50,50,70)
+            local cap = preset.pinned
+            pb.MouseButton1Click:Connect(function()
+                self.State.PinnedParts = {}
+                for _, group in ipairs(PART_GROUPS) do
+                    for _, p in ipairs(group.parts) do
+                        self.State.PinnedParts[p] = cap[group.label] or false
+                    end
+                end
+                for _, info in ipairs(pinButtons) do
+                    local all = true
+                    for _, p in ipairs(info.group.parts) do if not self.State.PinnedParts[p] then all=false; break end end
+                    if all then
+                        info.btn.BackgroundColor3 = self.Config.PinnedColor
+                        info.btn.TextColor3 = Color3.fromRGB(5,5,15); info.btn.Text = "PINNED"
+                    else
+                        info.btn.BackgroundColor3 = Color3.fromRGB(28,28,38)
+                        info.btn.TextColor3 = Color3.fromRGB(160,160,170); info.btn.Text = "FREE"
+                    end
+                end
+                if self.State.FakeCharacter then self:_refreshFakeCharacterColors() end
+            end)
+        end
+        sectionLabel("LIVE STATUS", 90)
+        local infoBox = Instance.new("TextLabel", scroll)
+        infoBox.Name = "InfoBox"; infoBox.LayoutOrder = 91; infoBox.Size = UDim2.new(1,-8,0,110)
+        infoBox.BackgroundColor3 = Color3.fromRGB(8,8,14); infoBox.Font = Enum.Font.Code
+        infoBox.Text = "STATUS: IDLE\nAWAITING ACTIVATION..."
+        infoBox.TextColor3 = self.Config.HighlightColor; infoBox.TextSize = 11
+        infoBox.TextXAlignment = Enum.TextXAlignment.Left; infoBox.TextYAlignment = Enum.TextYAlignment.Top
+        infoBox.BorderSizePixel = 0; infoBox.TextWrapped = true
+        Instance.new("UICorner", infoBox).CornerRadius = UDim.new(0,6)
+        Instance.new("UIStroke", infoBox).Color = Color3.fromRGB(30,30,45)
+        local ip = Instance.new("UIPadding", infoBox)
+        ip.PaddingLeft = UDim.new(0,8); ip.PaddingTop = UDim.new(0,6); ip.PaddingBottom = UDim.new(0,6)
+        local spacer = Instance.new("Frame", scroll)
+        spacer.LayoutOrder = 99; spacer.Size = UDim2.new(1,0,0,6); spacer.BackgroundTransparency = 1
+        screenGui.Parent = CoreGui
+    end
+    function CFrameDesync:Enable()
+        if self.State.IsEnabled then return end
+        self.State.IsEnabled = true
+        self:_createUI()
+    end
+    function CFrameDesync:Disable()
+        self:DeactivateDesync()
+        if self.State.UI then self.State.UI:Destroy(); self.State.UI = nil end
+        self.State.IsEnabled = false
+    end
+    function CFrameDesync:Toggle()
+        if self.State.IsEnabled then self:Disable() else self:Enable() end
+    end
+    CFrameDesync:Enable()
+    return CFrameDesync
+end)
 Modules.HeadCam = {
     State = {
         IsEnabled = false,
@@ -20345,7 +20840,11 @@ function Modules.AdonisPanel:Initialize()
         self:_initDeathLogger()
         task.spawn(function()
             local ok, err = pcall(function()
+
+ --── zukv2 decompiler core ──────────────────────────────────────────
+            
 local function main()
+
 	local ZukDecompile
 	local prettyPrint
 	local cleanOutput
@@ -20407,7 +20906,7 @@ local function main()
 	end
 	function Reader:Set(fp) FLOAT_PRECISION = fp end
 	local Strings = {
-		SUCCESS              = "%s",
+		SUCCESS              = "%s",  -- no meme header; callers add their own metadata
 		TIMEOUT              = "-- DECOMPILER TIMEOUT",
 		COMPILATION_FAILURE  = "-- SCRIPT FAILED TO COMPILE, ERROR:\n%s",
 		UNSUPPORTED_LBC_VERSION = "-- PASSED BYTECODE IS TOO OLD AND IS NOT SUPPORTED",
@@ -20611,7 +21110,7 @@ local function main()
 		UseTypeInfo          = true,
 		ListUsedGlobals      = true,
 		ReturnElapsedTime    = false,
-		CleanMode            = true,
+		CleanMode            = true,  -- strip prefix, use debug names, suppress boilerplate
 	}
 	local LuauCompileUserdataInfo = true
 	pcall(function()
@@ -20754,10 +21253,10 @@ local function main()
 							local function kv(idx) return proto.constants[idx+1] end
 							if     idxCount == 1 then tag = tostring(kv(ci1) and kv(ci1).value or "")
 							elseif idxCount == 2 then tag = tostring(kv(ci1) and kv(ci1).value or "")
-								..".."..tostring(kv(ci2) and kv(ci2).value or "")
+								.."."..tostring(kv(ci2) and kv(ci2).value or "")
 							elseif idxCount == 3 then tag = tostring(kv(ci1) and kv(ci1).value or "")
-								..".."..tostring(kv(ci2) and kv(ci2).value or "")
-								..".."..tostring(kv(ci3) and kv(ci3).value or "")
+								.."."..tostring(kv(ci2) and kv(ci2).value or "")
+								.."."..tostring(kv(ci3) and kv(ci3).value or "")
 							end
 							constValue = tag
 						elseif constType == BT.LBC_CONSTANT_TABLE then
@@ -20871,6 +21370,7 @@ local function main()
 					end
 				end
 				local function writeFlags()
+					-- guard: flags may already be a table if proto visited twice (DUPCLOSURE)
 					if type(flags) == "table" then return end
 					local rawFlags = type(flags) == "number" and flags or 0
 					local df = {}
@@ -21008,8 +21508,8 @@ local function main()
 		local function finalize(mainProtoId, registerActions, protoTable)
 			local finalResult = ""
 			local totalParameters = 0
-			local usedGlobals    = {}
-			local usedGlobalsSet = {}
+			local usedGlobals    = {}   -- ordered list for display
+			local usedGlobalsSet = {}   -- set for O(1) duplicate check
 			local function isValidGlobal(key)
 				if usedGlobalsSet[key] then return false end
 				return not isGlobal(key)
@@ -21037,6 +21537,9 @@ local function main()
 					local function makeJump(idx) idx-=1; jumpMarkers[idx]=(jumpMarkers[idx] or 0)+1 end
 					totalParameters += numParams
 					if proto.main and pflags and pflags.native then emit("--!native\n") end
+	
+					-- ── Debug name lookups ────────────────────────────────────────────
+					-- Build register-name map from debugLocals: reg → name at a given PC
 					local function buildRegNames(instrIdx)
 						local names = {}
 						if proto.debugLocals then
@@ -21048,13 +21551,30 @@ local function main()
 						end
 						return names
 					end
+					-- Upvalue names from debugUpvalues
 					local function fmtUpv(r)
+						if r == nil then return "upv_unknown" end
 						local du = proto.debugUpvalues
-						if du and du[r+1] and du[r+1].name ~= "" then
-							return du[r+1].name
+						if du then
+							-- debugUpvalues is 1-indexed; upvalue slot r is 0-based
+							local entry = du[r + 1]
+							if entry and entry.name and entry.name ~= "" then
+								return entry.name
+							end
 						end
-						return "upv_"..r
+						-- Fallback: the upvalue slot r maps to a captured register in the
+						-- enclosing proto via the caps table. Walk debugLocals for that register.
+						local capturedReg = caps[r]
+						if capturedReg ~= nil and proto.debugLocals then
+							for _, dl in ipairs(proto.debugLocals) do
+								if dl.register == capturedReg and dl.name and dl.name ~= "" then
+									return dl.name
+								end
+							end
+						end
+						return "upv_" .. tostring(r)
 					end
+					-- Register name: prefer debug name, fall back to p/v scheme
 					local regNameCache = {}
 					local function fmtReg(r, instrIdx)
 						if instrIdx and proto.debugLocals then
@@ -21073,6 +21593,7 @@ local function main()
 						end
 						return "v"..(r-numParams)
 					end
+					-- Param name helper (for fmtProto)
 					local function paramName(j)
 						if proto.debugLocals then
 							for _, dl in ipairs(proto.debugLocals) do
@@ -21091,7 +21612,15 @@ local function main()
 						if type(tonumber(k.value))=="number" then
 							return tostring(tonumber(string.format("%0."..options.ReaderFloatPrecision.."f", k.value)))
 						end
-						return toEscapedString(k.value)
+						local s = toEscapedString(k.value)
+						-- sanitize import paths: collapse any accidental double-dots (e.g. "Enum..EasingStyle")
+						-- that can appear when the string table has trailing/leading dots from bad bytecode
+						if k.type == LuauBytecodeTag.LBC_CONSTANT_IMPORT then
+							s = s:gsub("%.%.+", ".")  -- collapse multiple consecutive dots to one
+							s = s:gsub("^%.", "")      -- strip leading dot
+							s = s:gsub("%.$", "")      -- strip trailing dot
+						end
+						return s
 					end
 					local function fmtProto(p)
 						local body=""
@@ -21117,6 +21646,16 @@ local function main()
 							body ..= (p.numParams>0) and ", ..." or "..."
 						end
 						body ..= ")\n"
+						if options.ShowDebugInformation then
+							body ..= "-- proto pool id: "..p.id.."\n"
+							body ..= "-- num upvalues: "..p.numUpvalues.."\n"
+							body ..= "-- num inner protos: "..(p.sizeInnerProtos or 0).."\n"
+							body ..= "-- size instructions: "..(p.sizeInstructions or 0).."\n"
+							body ..= "-- size constants: "..(p.sizeConstants or 0).."\n"
+							body ..= "-- lineinfo gap: "..(p.lineInfoSize or "n/a").."\n"
+							body ..= "-- max stack size: "..p.maxStackSize.."\n"
+							body ..= "-- is typed: "..tostring(p.hasTypeInfo).."\n"
+						end
 						return body
 					end
 					local function writeProto(reg, p)
@@ -21124,13 +21663,20 @@ local function main()
 						if p.name then
 							emit("\n"..body)
 							writeActions(registerActions[p.id])
-							emit("end\n"..fmtReg(reg).." = "..p.name)
+							-- CleanMode: `local function Name()` already declares the binding,
+							-- so the trailing `reg = Name` assignment is redundant noise.
+							if not options.CleanMode then
+								emit("end\n"..fmtReg(reg).." = "..p.name)
+							else
+								emit("end")
+							end
 						else
 							emit(fmtReg(reg).." = "..body)
 							writeActions(registerActions[p.id])
 							emit("end")
 						end
 					end
+					-- Instructions that are pure VM bookkeeping in clean mode
 					local CLEAN_SUPPRESS = {
 						CLOSEUPVALS=true, PREPVARARGS=true, COVERAGE=true,
 						CAPTURE=true, FASTCALL=true, FASTCALL1=true,
@@ -21144,23 +21690,29 @@ local function main()
 						local oci = action.opCode
 						if not oci then continue end
 						local opn = oci.name
+						-- clean mode: skip pure bookkeeping ops
 						if options.CleanMode and CLEAN_SUPPRESS[opn] then continue end
+						-- clean mode: skip bare RETURN with no value at end of proto
 						if options.CleanMode and opn == "RETURN" then
 							local b = ed and ed[1] or 0
-							if b == 1 then continue end
+							if b == 1 then continue end  -- RETURN with B=1 means return nothing
 						end
+						-- clean mode: skip MOVE that just wires up a closure assignment
+						-- (those are handled inside writeProto already)
 						if options.CleanMode and opn == "MOVE" and
 						   i > 1 and actions[i-1] and
 						   (actions[i-1].opCode.name == "NEWCLOSURE" or
 						    actions[i-1].opCode.name == "DUPCLOSURE") then
 							continue
 						end
+						-- resolve register names at this instruction index
 						local function R(r) return fmtReg(r, i) end
 						local function handleJumps()
 							local n = jumpMarkers[i]
 							if n then
 								jumpMarkers[i]=nil
 							for _=1,n do emit("end\n") end
+	
 							end
 						end
 						if not options.CleanMode then
@@ -21175,48 +21727,74 @@ local function main()
 							end
 						end
 						if opn=="LOADNIL" then emit(R(ur[1]).." = nil")
+	
 						elseif opn=="LOADB" then
 							emit(R(ur[1]).." = "..toEscapedString(toBoolean(ed[1])))
+	
 							if ed[2]~=0 then emit(" +"..ed[2]) end
+	
 						elseif opn=="LOADN" then emit(R(ur[1]).." = "..ed[1])
+	
 						elseif opn=="LOADK" then emit(R(ur[1]).." = "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="MOVE"  then emit(R(ur[1]).." = "..R(ur[2]))
+	
 						elseif opn=="GETGLOBAL" then
 							local gk=tostring(consts[ed[1]+1] and consts[ed[1]+1].value or "")
 							if options.ListUsedGlobals and isValidGlobal(gk) then
 								table.insert(usedGlobals,gk); usedGlobalsSet[gk]=true
 							end
 							emit(R(ur[1]).." = "..gk)
+	
 						elseif opn=="SETGLOBAL" then
 							local gk=tostring(consts[ed[1]+1] and consts[ed[1]+1].value or "")
 							if options.ListUsedGlobals and isValidGlobal(gk) then
 								table.insert(usedGlobals,gk); usedGlobalsSet[gk]=true
 							end
 							emit(gk.." = "..R(ur[1]))
-						elseif opn=="GETUPVAL" then emit(R(ur[1]).." = "..fmtUpv(caps[ed[1]]))
-						elseif opn=="SETUPVAL" then emit(fmtUpv(caps[ed[1]]).." = "..R(ur[1]))
+	
+						elseif opn=="GETUPVAL" then
+							local slot = ed[1]
+							local resolvedCap = caps[slot]
+							emit(R(ur[1]).." = "..fmtUpv(resolvedCap))
+
+						elseif opn=="SETUPVAL" then
+							local slot = ed[1]
+							local resolvedCap = caps[slot]
+							emit(fmtUpv(resolvedCap).." = "..R(ur[1]))
+	
 						elseif opn=="CLOSEUPVALS" then emit("-- clear captures from back until: "..ur[1])
+	
 						elseif opn=="GETIMPORT" then
 							local imp=tostring(consts[ed[1]+1] and consts[ed[1]+1].value or "")
+							-- sanitize: collapse double-dots, strip edge dots
+							imp = imp:gsub("%.%.+", "."):gsub("^%.", ""):gsub("%.$", "")
 							local totalIdx = bit32.rshift(ed[2] or 0, 30)
 							if totalIdx==1 and options.ListUsedGlobals and isValidGlobal(imp) then
 								table.insert(usedGlobals,imp); usedGlobalsSet[imp]=true
 							end
 							emit(R(ur[1]).." = "..imp)
+	
 						elseif opn=="GETTABLE" then
 							emit(R(ur[1]).." = "..R(ur[2]).."["..R(ur[3]).."]")
+	
 						elseif opn=="SETTABLE" then
 							emit(R(ur[2]).."["..R(ur[3]).."] = "..R(ur[1]))
+	
 						elseif opn=="GETTABLEKS" then
 							local key = consts[ed[2]+1] and consts[ed[2]+1].value
 							emit(R(ur[1]).." = "..R(ur[2])..formatIndexString(key))
+	
 						elseif opn=="SETTABLEKS" then
 							local key = consts[ed[2]+1] and consts[ed[2]+1].value
 							emit(R(ur[2])..formatIndexString(key).." = "..R(ur[1]))
+	
 						elseif opn=="GETTABLEN" then
 							emit(R(ur[1]).." = "..R(ur[2]).."["..(ed[1]+1).."]")
+	
 						elseif opn=="SETTABLEN" then
 							emit(R(ur[2]).."["..(ed[1]+1).."] = "..R(ur[1]))
+	
 						elseif opn=="NEWCLOSURE" then
 							local p2=inner[ed[1]+1]; if p2 then writeProto(ur[1],p2) end
 						elseif opn=="DUPCLOSURE" then
@@ -21227,6 +21805,7 @@ local function main()
 						elseif opn=="NAMECALL" then
 							local method=tostring(consts[ed[2]+1] and consts[ed[2]+1].value or "")
 							emit("-- :"..method)
+	
 						elseif opn=="CALL" then
 							local baseR=ur[1]
 							local nArgs=ed[1]-1; local nRes=ed[2]-1
@@ -21258,6 +21837,7 @@ local function main()
 							end
 							callBody..=")"
 							emit(callBody)
+	
 						elseif opn=="RETURN" then
 							local baseR=ur[1]; local tot=ed[1]-2
 							local rb=""
@@ -21270,48 +21850,75 @@ local function main()
 								end
 							end
 							emit("return"..rb)
+	
 						elseif opn=="JUMP" then emit("-- jump to #"..(i+ed[1]))
+	
 						elseif opn=="JUMPBACK" then emit("-- jump back to #"..(i+ed[1]+1))
+	
 						elseif opn=="JUMPIF" then
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if not "..R(ur[1]).." then -- goto #"..ei)
+	
 						elseif opn=="JUMPIFNOT" then
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if "..R(ur[1]).." then -- goto #"..ei)
+	
 						elseif opn=="JUMPIFEQ" then
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if "..R(ur[1]).." == "..R(ur[2]).." then -- goto #"..ei)
+	
 						elseif opn=="JUMPIFLE" then
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if "..R(ur[1]).." >= "..R(ur[2]).." then -- goto #"..ei)
+	
 						elseif opn=="JUMPIFLT" then
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if "..R(ur[1]).." > "..R(ur[2]).." then -- goto #"..ei)
+	
 						elseif opn=="JUMPIFNOTEQ" then
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if "..R(ur[1]).." ~= "..R(ur[2]).." then -- goto #"..ei)
+	
 						elseif opn=="JUMPIFNOTLE" then
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if "..R(ur[1]).." <= "..R(ur[2]).." then -- goto #"..ei)
+	
 						elseif opn=="JUMPIFNOTLT" then
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if "..R(ur[1]).." < "..R(ur[2]).." then -- goto #"..ei)
+	
 						elseif opn=="ADD"  then emit(R(ur[1]).." = "..R(ur[2]).." + "..R(ur[3]))
+	
 						elseif opn=="SUB"  then emit(R(ur[1]).." = "..R(ur[2]).." - "..R(ur[3]))
+	
 						elseif opn=="MUL"  then emit(R(ur[1]).." = "..R(ur[2]).." * "..R(ur[3]))
+	
 						elseif opn=="DIV"  then emit(R(ur[1]).." = "..R(ur[2]).." / "..R(ur[3]))
+	
 						elseif opn=="MOD"  then emit(R(ur[1]).." = "..R(ur[2]).." % "..R(ur[3]))
+	
 						elseif opn=="POW"  then emit(R(ur[1]).." = "..R(ur[2]).." ^ "..R(ur[3]))
+	
 						elseif opn=="ADDK" then emit(R(ur[1]).." = "..R(ur[2]).." + "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="SUBK" then emit(R(ur[1]).." = "..R(ur[2]).." - "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="MULK" then emit(R(ur[1]).." = "..R(ur[2]).." * "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="DIVK" then emit(R(ur[1]).." = "..R(ur[2]).." / "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="MODK" then emit(R(ur[1]).." = "..R(ur[2]).." % "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="POWK" then emit(R(ur[1]).." = "..R(ur[2]).." ^ "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="AND"  then emit(R(ur[1]).." = "..R(ur[2]).." and "..R(ur[3]))
+	
 						elseif opn=="OR"   then emit(R(ur[1]).." = "..R(ur[2]).." or "..R(ur[3]))
+	
 						elseif opn=="ANDK" then emit(R(ur[1]).." = "..R(ur[2]).." and "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="ORK"  then emit(R(ur[1]).." = "..R(ur[2]).." or "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="CONCAT" then
 							local tgt=table.remove(ur,1)
 							local cb=""
@@ -21319,11 +21926,20 @@ local function main()
 								cb..=fmtReg(r); if k~=#ur then cb..=" .. " end
 							end
 							emit(R(tgt).." = "..cb)
+	
 						elseif opn=="NOT"    then emit(R(ur[1]).." = not "..R(ur[2]))
+	
 						elseif opn=="MINUS"  then emit(R(ur[1]).." = -"..R(ur[2]))
+	
 						elseif opn=="LENGTH" then emit(R(ur[1]).." = #"..R(ur[2]))
+	
 						elseif opn=="NEWTABLE" then
 							emit(R(ur[1]).." = {}")
+	
+							if options.ShowDebugInformation and ed[2] and ed[2]>0 then
+								emit(" ")
+	
+							end
 						elseif opn=="DUPTABLE" then
 							local cv=consts[ed[1]+1]
 							if cv and type(cv.value)=="table" then
@@ -21333,12 +21949,15 @@ local function main()
 									if k~=cv.value.size then tb..=", " end
 								end
 								emit(R(ur[1]).." = {} -- "..tb.."}")
+	
 							else emit(R(ur[1]).." = {}") end
+	
 						elseif opn=="SETLIST" then
 							local tgt=ur[1]; local src=ur[2]
 							local si=ed[1]; local vc=ed[2]
 							if vc==0 then
 								emit(R(tgt).."["..si.."] = [...]")
+	
 							else
 								local tot2=#ur-1; local cb=""
 								for k=1,tot2 do
@@ -21346,29 +21965,48 @@ local function main()
 									if k~=tot2 then cb..="\n" end
 								end
 								emit(cb)
+	
 							end
 						elseif opn=="FORNPREP" then
 							emit("for "..R(ur[3]).." = "..R(ur[3])..", "..R(ur[1])..", "..R(ur[2]).." do -- end at #"..(i+ed[1]))
 						elseif opn=="FORNLOOP" then
 							emit("end -- iterate + jump to #"..(i+ed[1]))
+	
 						elseif opn=="FORGLOOP" then
 							emit("end -- iterate + jump to #"..(i+ed[1]))
+	
 						elseif opn=="FORGPREP_INEXT" then
 							local tr=ur[1]+1
 							emit("for "..R(tr+2)..", "..R(tr+3).." in ipairs("..R(tr)..") do")
+	
 						elseif opn=="FORGPREP_NEXT" then
 							local tr=ur[1]+1
 							emit("for "..R(tr+2)..", "..R(tr+3).." in pairs("..R(tr)..") do")
+	
 						elseif opn=="FORGPREP" then
 							local ei=i+ed[1]+2
 							local ea=actions[ei]
 							local vb=""
-							if ea then
+							if ea and ea.usedRegisters and #ea.usedRegisters > 0 then
 								for k,r in ipairs(ea.usedRegisters) do
-									vb..=fmtReg(r); if k~=#ea.usedRegisters then vb..=", " end
+									vb..=fmtReg(r, ei); if k~=#ea.usedRegisters then vb..=", " end
 								end
+							else
+								-- FORGLOOP had no usedRegisters (debug stripped or aux=0).
+								-- Generic-for iteration vars live at baseReg+2, +3, ... relative to A.
+								local baseReg = ur[1]
+								local nVars = 2
+								if ea and ea.extraData and ea.extraData[2] then
+									nVars = math.max(1, bit32.band(ea.extraData[2], 0xFF))
+								end
+								local parts = {}
+								for k = 1, nVars do
+									parts[k] = fmtReg(baseReg + 2 + (k - 1), i)
+								end
+								vb = table.concat(parts, ", ")
 							end
 							emit("for "..vb.." in "..R(ur[1]).." do -- end at #"..ei)
+	
 						elseif opn=="GETVARARGS" then
 							local vc2=ed[1]-1
 							local rb=""
@@ -21379,21 +22017,28 @@ local function main()
 								end
 							end
 							emit(rb.." = ...")
+	
 						elseif opn=="PREPVARARGS" then emit("-- ... ; number of fixed args: "..ed[1])
+	
 						elseif opn=="LOADKX" then emit(R(ur[1]).." = "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="JUMPX"    then emit("-- jump to #"..(i+ed[1]))
+	
 						elseif opn=="COVERAGE" then emit("-- coverage ("..ed[1]..")")
+	
 						elseif opn=="JUMPXEQKNIL" then
 							local rev=bit32.rshift(ed[2] or 0,0x1F)~=1
 							local sign=rev and "~=" or "=="
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if "..R(ur[1]).." "..sign.." nil then -- goto #"..ei)
+	
 						elseif opn=="JUMPXEQKB" then
 							local val=tostring(toBoolean(bit32.band(ed[2] or 0,1)))
 							local rev=bit32.rshift(ed[2] or 0,0x1F)~=1
 							local sign=rev and "~=" or "=="
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if "..R(ur[1]).." "..sign.." "..val.." then -- goto #"..ei)
+	
 						elseif opn=="JUMPXEQKN" or opn=="JUMPXEQKS" then
 							local cidx=bit32.band(ed[2] or 0,0xFFFFFF)
 							local val=fmtConst(consts[cidx+1])
@@ -21401,20 +22046,32 @@ local function main()
 							local sign=rev and "~=" or "=="
 							local ei=i+ed[1]; makeJump(ei)
 							emit("if "..R(ur[1]).." "..sign.." "..val.." then -- goto #"..ei)
+	
 						elseif opn=="CAPTURE"  then emit("-- upvalue capture")
+	
 						elseif opn=="SUBRK"    then emit(R(ur[1]).." = "..fmtConst(consts[ed[1]+1]).." - "..R(ur[2]))
+	
 						elseif opn=="DIVRK"    then emit(R(ur[1]).." = "..fmtConst(consts[ed[1]+1]).." / "..R(ur[2]))
+	
 						elseif opn=="IDIV"     then emit(R(ur[1]).." = "..R(ur[2]).." // "..R(ur[3]))
+	
 						elseif opn=="IDIVK"    then emit(R(ur[1]).." = "..R(ur[2]).." // "..fmtConst(consts[ed[1]+1]))
+	
 						elseif opn=="FASTCALL" then emit("-- FASTCALL; "..Luau:GetBuiltinInfo(ed[1]).."()")
+	
 						elseif opn=="FASTCALL1" then emit("-- FASTCALL1; "..Luau:GetBuiltinInfo(ed[1]).."("..R(ur[1])..")")
+	
 						elseif opn=="FASTCALL2" then emit("-- FASTCALL2; "..Luau:GetBuiltinInfo(ed[1]).."("..R(ur[1])..", "..R(ur[2])..")")
+	
 						elseif opn=="FASTCALL2K" then
 							emit("-- FASTCALL2K; "..Luau:GetBuiltinInfo(ed[1]).."("..R(ur[1])..", "..fmtConst(consts[(ed[3] or 0)+1])..")")
+	
 						elseif opn=="FASTCALL3" then
 							emit("-- FASTCALL3; "..Luau:GetBuiltinInfo(ed[1]).."("..R(ur[1])..", "..R(ur[2])..", "..R(ur[3])..")")
+	
 						end
 						emit("\n")
+	
 						handleJumps()
 					end
 				end
@@ -21454,23 +22111,170 @@ local function main()
 			return manager(false, "UNSUPPORTED_LBC_VERSION")
 		end
 	end
+	local CONST_TYPE = {
+		[0]="nil",[1]="boolean",[2]="number(f64)",[3]="string",
+		[4]="import",[5]="table",[6]="closure",[7]="number(f32)",[8]="number(i16)"
+	}
+	local function parseProto(p, stringTable, depth)
+		local result = {
+			depth=depth or 0, maxStack=p:nextByte(), numParams=p:nextByte(),
+			numUpvals=p:nextByte(), isVararg=p:nextByte()~=0, flags=p:nextByte(),
+			constants={}, protos={}, upvalues={}, debugName="", strings={}, imports={},
+		}
+		local typeSize = p:nextVarInt()
+		if typeSize>0 then for _=1,typeSize do p:nextByte() end end
+		local instrCount = p:nextVarInt()
+		for _=1,instrCount do p:nextUInt32() end
+		local constCount = p:nextVarInt()
+		for i=1,constCount do
+			local kind=p:nextByte()
+			local name=CONST_TYPE[kind] or ("unknown("..kind..")")
+			local value
+			if     kind==0 then value="nil"
+			elseif kind==1 then value=p:nextByte()~=0 and "true" or "false"
+			elseif kind==2 then value=tostring(p:nextDouble())
+			elseif kind==7 then value=tostring(p:nextFloat())
+			elseif kind==8 then
+				local lo,hi=p:nextByte(),p:nextByte()
+				local n=lo+hi*256; if n>=32768 then n=n-65536 end; value=tostring(n)
+			elseif kind==3 then
+				local idx=p:nextVarInt()
+				value=stringTable[idx] or ("<string #"..idx..">")
+				table.insert(result.strings,value)
+			elseif kind==4 then
+				local id=p:nextUInt32()
+				local k0=bit32.band(bit32.rshift(id,20),0x3FF)
+				local k1=bit32.band(bit32.rshift(id,10),0x3FF)
+				local k2=bit32.band(id,0x3FF)
+				local parts={}
+				for _,k in ipairs({k0,k1,k2}) do
+					if stringTable[k] then table.insert(parts,stringTable[k]) end
+				end
+				value=table.concat(parts,"."); table.insert(result.imports,value)
+			elseif kind==5 then
+				local keys,ks=p:nextVarInt(),{}
+				for _=1,keys do
+					local kidx=p:nextVarInt(); table.insert(ks,stringTable[kidx] or "?")
+				end
+				value="{"..table.concat(ks,", ").."}"
+			elseif kind==6 then value="<proto #"..p:nextVarInt()..">"
+			else value="?" end
+			table.insert(result.constants,{kind=name,value=value,index=i-1})
+		end
+		local protoCount=p:nextVarInt()
+		for i=1,protoCount do
+			local ok,inner=pcall(parseProto,p,stringTable,depth+1)
+			table.insert(result.protos,ok and inner or {error=tostring(inner),depth=depth+1})
+		end
+		local hasLines=p:nextByte()
+		if hasLines~=0 then
+			local lgap=p:nextByte()
+			local intervalCount=bit32.rshift(instrCount-1,lgap)+1
+			for _=1,intervalCount do p:nextByte() end
+			for _=1,instrCount do p:nextByte() end
+		end
+		local hasDebug=p:nextByte()
+		if hasDebug~=0 then
+			local nameIdx=p:nextVarInt()
+			result.debugName=stringTable[nameIdx] or ""
+			local lc=p:nextVarInt()
+			for _=1,lc do p:nextVarInt();p:nextVarInt();p:nextVarInt();p:nextByte() end
+			local uc=p:nextVarInt()
+			for j=1,uc do
+				local ui=p:nextVarInt()
+				table.insert(result.upvalues,stringTable[ui] or ("upval_"..j))
+			end
+		end
+		return result
+	end
+	local function parseBytecode(bytes)
+		local reader2=Reader.new(bytes)
+		local ver=reader2:nextByte()
+		if ver==0 then return nil,"Compile error: "..reader2:nextString(reader2:len()-1) end
+		local typesVer=reader2:nextByte()
+		local stringCount=reader2:nextVarInt()
+		local stringTable={}
+		for i=1,stringCount do
+			local len=reader2:nextVarInt(); stringTable[i]=reader2:nextString(len)
+		end
+		local protoCount=reader2:nextVarInt()
+		local protos={}
+		for i=1,protoCount do
+			local ok,proto=pcall(parseProto,reader2,stringTable,0)
+			table.insert(protos,ok and proto or {error=tostring(proto),depth=0})
+		end
+		local entryProto=reader2:nextVarInt()
+		return {version=ver,typesVersion=typesVer,
+			stringTable=stringTable,protos=protos,entryProto=entryProto}
+	end
+	local function buildReport(parsed, scriptName)
+		local lines={}
+		local function w(s) table.insert(lines,s or "") end
+		w("_zukatechzukatech_zukatechzukatechhzukatech_")
+		w("  code reconstructor — "..(scriptName or "unknown"))
+		w("_zukatechzukatech_zukatechzukatechhzukatech_")
+		w("  Luau version : "..parsed.version)
+		w("  Types version: "..parsed.typesVersion)
+		w("  Proto count  : "..#parsed.protos)
+		w("  Entry proto  : #"..parsed.entryProto)
+		w("  Strings total: "..#parsed.stringTable)
+		w("")
+		w("── STRING TABLE ─────────────────────────────────────")
+		for i,s in ipairs(parsed.stringTable) do w(string.format("  [%3d] %q",i,s)) end
+		w("")
+		local function walkProto(proto,idx)
+			if proto.error then w("  [Proto #"..idx.."] PARSE ERROR: "..proto.error); return end
+			local ind=string.rep("  ",proto.depth+1)
+			local dn=proto.debugName~="" and (" '"..proto.debugName.."'") or ""
+			w(string.format("%s── Proto #%d%s",ind,idx,dn))
+			w(string.format("%s   params=%d  upvals=%d  maxStack=%d  vararg=%s",
+				ind,proto.numParams,proto.numUpvals,proto.maxStack,tostring(proto.isVararg)))
+			if #proto.upvalues>0 then w(ind.."   Upvalues: "..table.concat(proto.upvalues,", ")) end
+			if #proto.imports>0  then
+				w(ind.."   Imports:")
+				for _,imp in ipairs(proto.imports) do w(ind.."     "..imp) end
+			end
+			if #proto.strings>0  then
+				w(ind.."   String literals:")
+				for _,s in ipairs(proto.strings) do w(ind..'     "'..s..'"') end
+			end
+			if #proto.constants>0 then
+				w(ind.."   All constants:")
+				for _,c in ipairs(proto.constants) do
+					w(string.format("%s     [%2d] %-14s %s",ind,c.index,c.kind,tostring(c.value)))
+				end
+			end
+			w("")
+			for i2,inner in ipairs(proto.protos) do walkProto(inner,i2) end
+		end
+		w("── PROTO TREE ───────────────────────────────────────")
+		for i,proto in ipairs(parsed.protos) do walkProto(proto,i) end
+		return table.concat(lines,"\n")
+	end
+
 	local function _ppImpl(text)
 		local result = {}
 		local depth  = 0
+	
 		local DEDENT_BEFORE      = { ["end"]=true, ["until"]=true }
 		local INDENT_AFTER       = { ["then"]=true, ["do"]=true, ["repeat"]=true }
 		local DEDENT_THEN_INDENT = { ["else"]=true, ["elseif"]=true }
+	
 		local function stripStrings(s)
+			-- remove string literals then line comments to get bare keyword tokens
 			s = s:gsub('"[^"\\]*(?:\\.[^"\\]*)*"', '""')
 			s = s:gsub("'[^'\\]*(?:\\.[^'\\]*)*'", "''")
-			s = s:gsub("%-%-.*$", "")
+			s = s:gsub("%-%-.*$", "")  -- strip trailing comment
 			return s
 		end
+	
 		local function firstWord(s)
 			return (stripStrings(s):match("^%s*([%a_][%w_]*)")) or ""
 		end
+	
 		local function containsOpener(s)
 			local clean = stripStrings(s)
+			-- elseif/else are already handled by DEDENT_THEN_INDENT; don't double-indent
 			local fw = clean:match("^%s*([%a_][%w_]*)")
 			if fw == "elseif" or fw == "else" then return false end
 			for w in clean:gmatch("[%a_][%w_]*") do
@@ -21479,35 +22283,46 @@ local function main()
 			end
 			return false
 		end
+	
 		for line in (text .. "\n"):gmatch("[^\n]*\n") do
 			local bare = line:gsub("\n$", "")
 			if bare == "" then
 				result[#result + 1] = "\n"; continue
 			end
+	
+			-- strip disasm prefix: [NNN] :NNN: OPNAME<spaces>
 			local expr = bare:match("^%[%d+%]%s*:?%d*:?%s*%u[%u_]*%s+(.*)") or bare
+	
 			local kw = firstWord(expr)
+	
 			if DEDENT_THEN_INDENT[kw] then
 				depth = math.max(0, depth - 1)
 				result[#result + 1] = string.rep("    ", depth) .. bare .. "\n"
 				depth += 1
+	
 			elseif DEDENT_BEFORE[kw] then
 				depth = math.max(0, depth - 1)
 				result[#result + 1] = string.rep("    ", depth) .. bare .. "\n"
+	
 			else
 				result[#result + 1] = string.rep("    ", depth) .. bare .. "\n"
 				if containsOpener(expr) then depth += 1 end
 			end
 		end
+	
 		return table.concat(result)
 	end
+
 	local function _coImpl(text)
 		local rawLines = {}
 		for line in (text .. "\n"):gmatch("[^\n]*\n") do
 			rawLines[#rawLines + 1] = line:gsub("\n$", "")
 		end
+
 		local function escpat(s)
 			return s:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
 		end
+
 		local function nextNonBlank(start)
 			local j = start
 			while j <= #rawLines and (rawLines[j] == nil or rawLines[j]:match("^%s*$")) do
@@ -21515,6 +22330,10 @@ local function main()
 			end
 			return j
 		end
+
+		-- Pass 1: collapse single-use constant loads into the next usage line
+		-- Handles: strings, numbers, booleans, nil, and bare name/import paths
+		-- e.g. v2 = "RunService" / v0 = v0:GetService(v2) → v0 = v0:GetService("RunService")
 		local function tryCollapse(i)
 			local line = rawLines[i]
 			if line == nil then return false end
@@ -21523,6 +22342,7 @@ local function main()
 			if not reg then reg, lit = line:match('^%s*(v%d+) = (true)%s*$') end
 			if not reg then reg, lit = line:match('^%s*(v%d+) = (false)%s*$') end
 			if not reg then reg, lit = line:match('^%s*(v%d+) = (nil)%s*$') end
+			-- bare import/global paths like: v2 = game.Players.LocalPlayer
 			if not reg then reg, lit = line:match('^%s*(v%d+) = ([%a_][%w_%.]+)%s*$') end
 			if not reg then return false end
 			local j = nextNonBlank(i + 1)
@@ -21533,13 +22353,21 @@ local function main()
 			for _ in nextLine:gmatch(ep) do count += 1 end
 			if count ~= 1 then return false end
 			if nextLine:match("^%s*" .. ep .. "%s*=") then return false end
+			-- don't collapse if reg is reassigned in any skipped blank lines between i and j
+			for k = i + 1, j - 1 do
+				local midLine = rawLines[k]
+				if midLine and midLine:match("^%s*" .. ep .. "%s*=") then return false end
+			end
 			rawLines[j] = nextLine:gsub(ep, lit, 1)
 			rawLines[i] = nil
 			return true
 		end
-		for _ = 1, 8 do
+		for _ = 1, 8 do  -- more passes for deeper constant chains
 			for i = 1, #rawLines do tryCollapse(i) end
 		end
+
+		-- Pass 1b: fold single-use field/index accesses
+		-- e.g. v3 = v2.Players / use(v3)  →  use(v2.Players)
 		local function tryFoldField(i)
 			local line = rawLines[i]
 			if not line then return false end
@@ -21555,10 +22383,20 @@ local function main()
 			local nextLine = rawLines[j]
 			local epSrc = escpat(src)
 			local epReg = escpat(lreg)
+			-- count uses of lreg in the next line
 			local count = 0
 			for _ in nextLine:gmatch(epReg) do count += 1 end
 			if count ~= 1 then return false end
+			-- don't fold into an assignment to lreg itself
 			if nextLine:match("^%s*" .. epReg .. "%s*=") then return false end
+			-- don't fold if src is reassigned between i and j
+			for k = i + 1, j - 1 do
+				local midLine = rawLines[k]
+				if midLine and midLine:match("^%s*" .. epSrc .. "%s*=") then return false end
+			end
+			-- don't fold if src itself is also a folded upvalue reference (upv_ prefix)
+			-- to avoid chaining upvalue substitutions that create misleading expressions
+			if src:match("^upv_") then return false end
 			rawLines[j] = nextLine:gsub(epReg, src .. field, 1)
 			rawLines[i] = nil
 			return true
@@ -21566,6 +22404,8 @@ local function main()
 		for _ = 1, 6 do
 			for i = 1, #rawLines do tryFoldField(i) end
 		end
+
+		-- Pass 2: strip comment noise
 		local pass2 = {}
 		for idx = 1, #rawLines do
 			local line = rawLines[idx]
@@ -21578,6 +22418,8 @@ local function main()
 			line = line:gsub("%s*%-%- iterate %+ jump to #%d+$", "")
 			pass2[#pass2 + 1] = line
 		end
+
+		-- Pass 3: drop vN = nil lines immediately before a for loop
 		local pass3 = {}
 		local i = 1
 		while i <= #pass2 do
@@ -21593,6 +22435,8 @@ local function main()
 				i += 1
 			end
 		end
+
+		-- Pass 4: insert `local` on first assignment of each vN register
 		local seen = {}
 		local pass4 = {}
 		for _, line in ipairs(pass3) do
@@ -21603,6 +22447,8 @@ local function main()
 			end
 			pass4[#pass4 + 1] = line
 		end
+
+		-- Pass 5: collapse runs of multiple blank lines into one
 		local final = {}
 		local lastBlank = false
 		for _, line in ipairs(pass4) do
@@ -21611,8 +22457,10 @@ local function main()
 			lastBlank = isBlank
 			final[#final + 1] = line
 		end
+
 		return table.concat(final, "\n")
 	end
+
 		ZukDecompile = Decompile
 		prettyPrint  = _ppImpl
 		cleanOutput  = _coImpl
@@ -34216,7 +35064,7 @@ RegisterCommand({Name = "weaponeditor", Aliases = {"weape"}, Description = "Univ
 RegisterCommand({Name = "doomshammer", Aliases = {}, Description = "For Dumb bossfights"}, function() loadstringCmd("https://raw.githubusercontent.com/zukatech1/ZukaTechPanel/refs/heads/main/doomshammer.lua", " Loading.. ") end)
 RegisterCommand({Name = "tptoswords", Aliases = {}, Description = "For Dumb bossfights"}, function() loadstringCmd("https://raw.githubusercontent.com/zukatech1/ZukaTechPanel/refs/heads/main/SwordGrabberBossfightGame.lua", " Loading.. ") end)
 RegisterCommand({Name = "removeff", Aliases = {}, Description = "Removes Forcefields on the client, can be useful with low security"}, function() loadstringCmd("https://raw.githubusercontent.com/zukatech1/ZukaTechPanel/refs/heads/main/removeforcefield.txt", " Loading.. ") end)
-RegisterCommand({Name = "Ghidra", Aliases = {}, Description = "Better than all."}, function() loadstringCmd("https://raw.githubusercontent.com/zukatech1/Main-Repo/refs/heads/main/HEXOverseer.lua", " Loading.. ") end)
+RegisterCommand({Name = "Overseer", Aliases = {}, Description = "Better than all."}, function() loadstringCmd("https://raw.githubusercontent.com/idioticanisgae-pixel/fourfortyfivepmsundaymarch29build/refs/heads/main/The_Overseer.lua", " Loading.. ") end)
 RegisterCommand({Name = "removeadonis", Aliases = {}, Description = "Says no adonis"}, function() loadstringCmd("https://raw.githubusercontent.com/zukatech1/Main-Repo/refs/heads/main/ByeByeAdonis.lua", " Loading.. ") end)
 RegisterCommand({Name = "teleporter", Aliases = {"tpui"}, Description = "Loads the Game Universe."}, function() loadstringCmd("https://raw.githubusercontent.com/zukatech1/ZukaTechPanel/refs/heads/main/GameFinder.lua", "stolen from nameless-admin") end)
 RegisterCommand({Name = "autofling", Aliases = {"pwned"}, Description = "Pwned Flinger"}, function() loadstringCmd("https://raw.githubusercontent.com/zukatech1/ZukaTechPanel/refs/heads/main/Ultimatefling.lua", "Loaded!") end)
