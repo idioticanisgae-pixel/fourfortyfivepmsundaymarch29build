@@ -2098,7 +2098,7 @@ local function GlowOutline(frame, color, thickness)
     end)
     return inner, glow
 end
-Modules.CommandBar = {
+--[[Modules.CommandBar = {
     State = {
         UI = nil,
         Container = nil,
@@ -3105,7 +3105,7 @@ function DoNotif(text: string, duration: number?): ()
     if Modules.CommandBar and Modules.CommandBar.AddOutput then
         Modules.CommandBar:AddOutput(tostring(text), Modules.CommandBar.Theme.Text)
     end
-end
+end]]
 Modules.UnlockMouse = { State = { Enabled = false, Connection = nil } }
 RegisterCommand({ Name = "unlockmouse", Aliases = {"unlockcursor", "freemouse", "um"}, Description = "Toggles a persistent loop to unlock the mouse cursor." }, function()
 local State = Modules.UnlockMouse.State
@@ -20930,12 +20930,6 @@ Modules.AdonisPanel = {
             Red           = Color3.fromRGB(220, 60,  60),
             Purple        = Color3.fromRGB(120, 60,  200),
             Blue          = Color3.fromRGB(50,  100, 200),
-            SynKeyword    = Color3.fromRGB(197, 134, 192),
-            SynString     = Color3.fromRGB(206, 145, 120),
-            SynNumber     = Color3.fromRGB(179, 213, 132),
-            SynComment    = Color3.fromRGB(106, 153, 85),
-            SynFunction   = Color3.fromRGB(220, 220, 170),
-            SynOperator   = Color3.fromRGB(212, 212, 212),
         },
         Size        = Vector2.new(510, 283),
         Position    = UDim2.new(0.5, -732, 0.5, 97),
@@ -20986,54 +20980,123 @@ local function lineColor(text, T)
     end
     return nil, nil
 end
-local LUA_KEYWORDS = {
+-- ── Syntax highlighter ───────────────────────────────────────────────────
+local Syntax = {
+    Text          = Color3.fromRGB(204,204,204),
+    Operator      = Color3.fromRGB(204,204,204),
+    Number        = Color3.fromRGB(255,198,0),
+    String        = Color3.fromRGB(173,241,149),
+    Comment       = Color3.fromRGB(102,102,102),
+    Keyword       = Color3.fromRGB(248,109,124),
+    BuiltIn       = Color3.fromRGB(132,214,247),
+    LocalMethod   = Color3.fromRGB(253,251,172),
+    LocalProperty = Color3.fromRGB(97,161,241),
+    Nil           = Color3.fromRGB(255,198,0),
+    Bool          = Color3.fromRGB(255,198,0),
+    Function      = Color3.fromRGB(248,109,124),
+    Local         = Color3.fromRGB(248,109,124),
+    Self          = Color3.fromRGB(248,109,124),
+    FunctionName  = Color3.fromRGB(253,251,172),
+    Bracket       = Color3.fromRGB(204,204,204),
+}
+local HL_KEYWORDS = {
     ["and"]=true,["break"]=true,["do"]=true,["else"]=true,["elseif"]=true,
     ["end"]=true,["false"]=true,["for"]=true,["function"]=true,["if"]=true,
     ["in"]=true,["local"]=true,["nil"]=true,["not"]=true,["or"]=true,
-    ["repeat"]=true,["return"]=true,["then"]=true,["true"]=true,["until"]=true,
-    ["while"]=true,["goto"]=true,["self"]=true,
+    ["repeat"]=true,["return"]=true,["then"]=true,["true"]=true,
+    ["until"]=true,["while"]=true,
 }
-local function tokenizeLua(line)
-    local T = Modules.AdonisPanel.Config.Theme
-    local tokens = {}
-    local i = 1
-    local function push(txt, col) if txt~="" then table.insert(tokens,{text=txt,color=col}) end end
+local HL_BUILTINS = {
+    ["game"]=true,["Players"]=true,["TweenService"]=true,["ScreenGui"]=true,
+    ["Instance"]=true,["UDim2"]=true,["Vector2"]=true,["Vector3"]=true,
+    ["Color3"]=true,["Enum"]=true,["loadstring"]=true,["warn"]=true,
+    ["pcall"]=true,["print"]=true,["UDim"]=true,["delay"]=true,
+    ["require"]=true,["spawn"]=true,["tick"]=true,["getfenv"]=true,
+    ["workspace"]=true,["setfenv"]=true,["getgenv"]=true,["script"]=true,
+    ["string"]=true,["pairs"]=true,["type"]=true,["math"]=true,
+    ["tonumber"]=true,["tostring"]=true,["CFrame"]=true,["BrickColor"]=true,
+    ["table"]=true,["Random"]=true,["Ray"]=true,["xpcall"]=true,
+    ["coroutine"]=true,["_G"]=true,["_VERSION"]=true,["debug"]=true,
+    ["Axes"]=true,["assert"]=true,["error"]=true,["ipairs"]=true,
+    ["rawequal"]=true,["rawget"]=true,["rawset"]=true,["select"]=true,
+    ["bit32"]=true,["buffer"]=true,["task"]=true,["os"]=true,
+}
+local HL_METHODS = {
+    ["WaitForChild"]=true,["FindFirstChild"]=true,["GetService"]=true,
+    ["Destroy"]=true,["Clone"]=true,["IsA"]=true,["ClearAllChildren"]=true,
+    ["GetChildren"]=true,["GetDescendants"]=true,["Connect"]=true,
+    ["Disconnect"]=true,["Fire"]=true,["Invoke"]=true,["rgb"]=true,
+    ["FireServer"]=true,["request"]=true,["call"]=true,
+}
+local function _hlColorHex(c)
+    return string.format("#%02x%02x%02x",
+        math.floor(c.R*255), math.floor(c.G*255), math.floor(c.B*255))
+end
+local function _hlTokenize(line)
+    local tokens, i = {}, 1
     while i <= #line do
-        if line:sub(i,i+1) == "--" then
-            push(line:sub(i), T.SynComment) break
-        end
-        if line:sub(i,i) == '"' then
-            local j = line:find('"', i+1, true)
-            j = j or #line
-            push(line:sub(i,j), T.SynString) i=j+1
-        elseif line:sub(i,i) == "'" then
-            local j = line:find("'", i+1, true)
-            j = j or #line
-            push(line:sub(i,j), T.SynString) i=j+1
-        elseif line:sub(i,i):match("%d") then
-            local s,e = line:find("^%-?%d+%.?%d*", i)
-            if s then push(line:sub(s,e), T.SynNumber) i=e+1
-            else push(line:sub(i,i), T.SynOperator) i=i+1 end
-        elseif line:sub(i,i):match("[%a_]") then
-            local s,e = line:find("^[%a_][%w_]*", i)
-            local word = line:sub(s,e)
-            if LUA_KEYWORDS[word] then
-                push(word, T.SynKeyword)
-            elseif line:sub(e+1,e+1) == "(" then
-                push(word, T.SynFunction)
+        local c = line:sub(i,i)
+        if c == "-" and line:sub(i,i+1) == "--" then
+            table.insert(tokens, {line:sub(i), "Comment"}); break
+        elseif c == "[" and line:sub(i,i+1):match("%[=*%[") then
+            local eqCount = 0
+            local k = i+1
+            while line:sub(k,k) == "=" do eqCount += 1; k += 1 end
+            if line:sub(k,k) == "[" then
+                local close = "]"..string.rep("=",eqCount).."]"
+                local endIdx = line:find(close, k+1, true)
+                local j = endIdx and (endIdx + #close - 1) or #line
+                table.insert(tokens, {line:sub(i,j), "String"}); i = j
             else
-                push(word, T.Text)
+                table.insert(tokens, {c, "Operator"})
             end
-            i = e+1
-        elseif line:sub(i,i):match("%s") then
-            local s,e = line:find("^%s+", i)
-            push(line:sub(s,e), T.Text) i=e+1
+        elseif c == '"' or c == "'" then
+            local q, j = c, i+1
+            while j <= #line do
+                if line:sub(j,j) == q and line:sub(j-1,j-1) ~= "\\" then break end
+                j += 1
+            end
+            table.insert(tokens, {line:sub(i,j), "String"}); i = j
+        elseif c:match("%d") then
+            local j = i
+            while j <= #line and line:sub(j,j):match("[%d%.]") do j += 1 end
+            table.insert(tokens, {line:sub(i,j-1), "Number"}); i = j-1
+        elseif c:match("[%a_]") then
+            local j = i
+            while j <= #line and line:sub(j,j):match("[%w_]") do j += 1 end
+            table.insert(tokens, {line:sub(i,j-1), "Word"}); i = j-1
         else
-            push(line:sub(i,i), T.SynOperator) i=i+1
+            table.insert(tokens, {c, "Operator"})
         end
+        i += 1
     end
     return tokens
 end
+local function _hlDetect(tokens, idx)
+    local val, typ = tokens[idx][1], tokens[idx][2]
+    if typ ~= "Word" then return typ end
+    if HL_KEYWORDS[val]  then return "Keyword"  end
+    if HL_BUILTINS[val]  then return "BuiltIn"  end
+    if HL_METHODS[val]   then return "LocalMethod" end
+    if idx > 1 and tokens[idx-1][1] == "." then return "LocalProperty" end
+    if idx > 1 and tokens[idx-1][1] == ":" then return "LocalMethod" end
+    if val == "self"  then return "Self" end
+    if val == "true" or val == "false" then return "Bool" end
+    if val == "nil"   then return "Nil"  end
+    if idx > 1 and tokens[idx-1][1] == "function" then return "FunctionName" end
+    return "Text"
+end
+local function hlLine(line)
+    local tokens = _hlTokenize(line)
+    local out = ""
+    for i, tok in ipairs(tokens) do
+        local col = Syntax[_hlDetect(tokens, i)] or Syntax.Text
+        local safe = tok[1]:gsub("&","&amp;"):gsub("<","&lt;"):gsub(">","&gt;")
+        out ..= string.format('<font color="%s">%s</font>', _hlColorHex(col), safe)
+    end
+    return out
+end
+-- ─────────────────────────────────────────────────────────────────────────
 function Modules.AdonisPanel:_initToast()
     if self.State.ToastGui then return end
     local tg = make("ScreenGui", {
@@ -21562,18 +21625,6 @@ function Modules.AdonisPanel:_build()
     -- make caret visible by giving text a near-black color that blends with bg
     codeInput.TextColor3 = Color3.fromRGB(22,22,22)
 
-    -- Helpers
-    local function colorToHex(c)
-        return string.format("%02X%02X%02X",
-            math.floor(c.R*255), math.floor(c.G*255), math.floor(c.B*255))
-    end
-    local function escapeRich(s)
-        s = s:gsub("&","&amp;")
-        s = s:gsub("<","&lt;")
-        s = s:gsub(">","&gt;")
-        return s
-    end
-
     -- Rebuild line numbers to match current line count
     local _lineLabels = {}
     local function rebuildLineNums(count)
@@ -21614,12 +21665,7 @@ function Modules.AdonisPanel:_build()
             local lines = code:split("\n")
             local richLines = {}
             for _, line in ipairs(lines) do
-                local tokens = tokenizeLua(line)
-                local richLine = ""
-                for _, tok in ipairs(tokens) do
-                    richLine = richLine..('<font color="#'..colorToHex(tok.color)..'">'..(escapeRich(tok.text))..'</font>')
-                end
-                table.insert(richLines, richLine)
+                table.insert(richLines, hlLine(line))
             end
             hlOverlay.Text = table.concat(richLines, "\n")
             -- Resize canvas so scroll works correctly
