@@ -1,17 +1,23 @@
---[[ zukv2™  legacy zex - built from scratch ]]
+     --[[
+            _           ____   ™ 
+  _____   _| | ____   _|___ \  
+ |_  / | | | |/ /\ \ / / __) | 
+  / /| |_| |   <  \ V / / __/  
+ /___|\__,_|_|\_\  \_/ |_____| 
+                               
+--]]
 
 
 local FLOAT_PRECISION  = 7
 
 
-local Players          = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local localPlayer      = Players.LocalPlayer
-local playerGui        = localPlayer:WaitForChild("PlayerGui")
+          local Players          =             game:GetService("Players")
+        local UserInputService  =    game:GetService("UserInputService")
+     local localPlayer         =                  Players.LocalPlayer
+  local playerGui             = localPlayer:WaitForChild("PlayerGui")
 
 
 local Reader = {}
-
 
 function Reader.new(bytecode)
 	local stream = buffer.fromstring(bytecode)
@@ -2134,16 +2140,88 @@ end
 local ROW_H      = 17
 local INDENT_PER = 14
 local MIN_SIZE   = Vector2.new(350, 250)
-local CLASS_ICONS = {
-    Folder=Vector2.new(96,96), Model=Vector2.new(0,32), Part=Vector2.new(128,32),
-    MeshPart=Vector2.new(128,32), UnionOperation=Vector2.new(128,32),
-    Humanoid=Vector2.new(0,160), Script=Vector2.new(0,64),
-    LocalScript=Vector2.new(32,64), ModuleScript=Vector2.new(64,64),
-    RemoteEvent=Vector2.new(192,128), RemoteFunction=Vector2.new(224,128),
-    Workspace=Vector2.new(0,0), Players=Vector2.new(96,0),
-    Lighting=Vector2.new(64,0), ReplicatedStorage=Vector2.new(160,32),
-    StarterGui=Vector2.new(128,0),
-}
+local ICON_SIZE = 14
+local CLASS_ICONS = {}
+local function buildIconTable()
+    if type(getgenv().getclassicons) == "function" then
+        local ok, result = pcall(getgenv().getclassicons)
+        if ok and type(result) == "table" then
+            for cls, id in pairs(result) do
+                CLASS_ICONS[cls] = tostring(id)
+            end
+            return
+        end
+    end
+    local SHEET = "rbxassetid://5034718129"
+    local CS    = 16
+    local function cell(c, r) return {sheet=SHEET, ox=c*CS, oy=r*CS} end
+    local SHEET_MAP = {
+        Workspace              = cell(0,  0),
+        Camera                 = cell(1,  0),
+        Lighting               = cell(2,  0),
+        StarterGui             = cell(4,  0),
+        Players                = cell(3,  0),
+        Teams                  = cell(5,  0),
+        ServerScriptService    = cell(6,  0),
+        Model                  = cell(0,  1),
+        Part                   = cell(4,  1),
+        MeshPart               = cell(4,  1),
+        WedgePart              = cell(4,  1),
+        CornerWedgePart        = cell(4,  1),
+        TrussPart              = cell(4,  1),
+        UnionOperation         = cell(4,  1),
+        SpecialMesh            = cell(4,  1),
+        ReplicatedStorage      = cell(5,  1),
+        ReplicatedFirst        = cell(5,  1),
+        ServerStorage          = cell(5,  1),
+        Folder                 = cell(3,  3),
+        Script                 = cell(0,  2),
+        LocalScript            = cell(1,  2),
+        ModuleScript           = cell(2,  2),
+        Humanoid               = cell(0,  5),
+        RemoteEvent            = cell(6,  4),
+        RemoteFunction         = cell(7,  4),
+        BindableEvent          = cell(5,  4),
+        BindableFunction       = cell(6,  5),
+        Sound                  = cell(0,  6),
+        SoundService           = cell(0,  6),
+        SoundGroup             = cell(0,  6),
+        Frame                  = cell(5,  2),
+        ScrollingFrame         = cell(5,  2),
+        ScreenGui              = cell(4,  2),
+        ImageLabel             = cell(6,  2),
+        ImageButton            = cell(7,  2),
+        TextLabel              = cell(0,  3),
+        TextButton             = cell(1,  3),
+        TextBox                = cell(2,  3),
+        BillboardGui           = cell(5,  3),
+        SurfaceGui             = cell(6,  3),
+        ViewportFrame          = cell(7,  3),
+        StringValue            = cell(0,  4),
+        IntValue               = cell(0,  4),
+        NumberValue            = cell(0,  4),
+        BoolValue              = cell(0,  4),
+        ObjectValue            = cell(0,  4),
+        CFrameValue            = cell(0,  4),
+        Color3Value            = cell(0,  4),
+        Vector3Value           = cell(0,  4),
+        ParticleEmitter        = cell(7,  1),
+        Fire                   = cell(7,  1),
+        Smoke                  = cell(7,  1),
+        Sparkles               = cell(7,  1),
+        WeldConstraint         = cell(2,  5),
+        HingeConstraint        = cell(2,  5),
+        BallSocketConstraint   = cell(2,  5),
+        Motor6D                = cell(2,  5),
+        StarterPlayer          = cell(3,  0),
+        StarterPlayerScripts   = cell(3,  0),
+        StarterCharacterScripts= cell(3,  0),
+    }
+    for cls, v in pairs(SHEET_MAP) do
+        CLASS_ICONS[cls] = v
+    end
+end
+buildIconTable()
 local QUICK_NAV_SERVICES = {
     "Workspace","Players","Lighting","ReplicatedFirst",
     "ReplicatedStorage","StarterGui","StarterPack",
@@ -2158,7 +2236,7 @@ local rowFrames    = {}
 local scrollOffset = 0
 local filterText   = ""
 local ctxMenu      = nil
-local refreshProps -- forward declaration; defined later after UI is built
+local refreshProps
 local function hasChildren(inst)
     local ok, ch = pcall(inst.GetChildren, inst)
     return ok and #ch > 0
@@ -2440,36 +2518,58 @@ local sg = mk("ScreenGui", {
     Name="Zukv2_AllInOne", DisplayOrder=10,
     ZIndexBehavior=Enum.ZIndexBehavior.Global, ResetOnSpawn=false
 })
+local PANEL_W       = 260
+local DECOMP_W      = 500
+local COLLAPSED_W   = 260
+local panelExpanded = false
 local main = mk("Frame", {
-    Name="Main", Size=UDim2.new(0,760,0,480),
-    Position=UDim2.new(0.5,-380,0.5,-240),
-    BackgroundColor3=Color3.fromRGB(35,35,35), BorderSizePixel=1
+    Name="Main",
+    Size=UDim2.new(0, PANEL_W, 1, 0),
+    Position=UDim2.new(1, -PANEL_W, 0, 0),
+    BackgroundColor3=Color3.fromRGB(35,35,35), BorderSizePixel=0,
+    ClipsDescendants=false,
 }, sg)
 mk("UIStroke",{Color=Color3.fromRGB(60,60,60),Thickness=1}, main)
 local topBar = mk("Frame",{
-    Name="TopBar", Size=UDim2.new(1,0,0,25),
-    BackgroundColor3=Color3.fromRGB(45,45,45), BorderSizePixel=1
+    Name="TopBar", Size=UDim2.new(1,0,0,22),
+    BackgroundColor3=Color3.fromRGB(42,42,42), BorderSizePixel=0
 }, main)
 mk("TextLabel",{
-    Name="Title", Size=UDim2.new(1,-60,1,0), Position=UDim2.new(0,10,0,0),
-    BackgroundTransparency=1, Text="zukv2 Explorer",
-    TextColor3=Color3.fromRGB(220,220,220), TextXAlignment=Enum.TextXAlignment.Left,
-    Font=Enum.Font.SourceSansBold, TextSize=14
+    Name="Title", Size=UDim2.new(1,-50,1,0), Position=UDim2.new(0,8,0,0),
+    BackgroundTransparency=1, Text="zukv2",
+    TextColor3=Color3.fromRGB(200,200,200), TextXAlignment=Enum.TextXAlignment.Left,
+    Font=Enum.Font.SourceSansBold, TextSize=12
 }, topBar)
 local closeBtn = mk("TextButton",{
-    Name="Close", Size=UDim2.new(0,25,1,0), Position=UDim2.new(1,-25,0,0),
-    BackgroundColor3=Color3.fromRGB(180,50,50), BackgroundTransparency=1,
-    Text="X", TextColor3=Color3.fromRGB(255,255,255), BorderSizePixel=1
+    Name="Close", Size=UDim2.new(0,22,0,18), Position=UDim2.new(1,-24,0,2),
+    BackgroundColor3=Color3.fromRGB(180,50,50), BackgroundTransparency=0.3,
+    Text="✕", TextColor3=Color3.fromRGB(255,255,255), BorderSizePixel=0,
+    Font=Enum.Font.SourceSansBold, TextSize=11
 }, topBar)
+local toggleBtn = mk("TextButton",{
+    Name="ToggleBtn",
+    Size=UDim2.new(0,18,0,48),
+    Position=UDim2.new(0,-18,0.5,-24),
+    BackgroundColor3=Color3.fromRGB(42,42,42),
+    BackgroundTransparency=0,
+    BorderSizePixel=0,
+    Text="◀",
+    TextColor3=Color3.fromRGB(180,180,180),
+    Font=Enum.Font.SourceSansBold, TextSize=12,
+    ZIndex=20,
+}, main)
+mk("UICorner",{CornerRadius=UDim.new(0,4)}, toggleBtn)
+mk("Frame",{
+    Size=UDim2.new(0,1,1,0), Position=UDim2.new(0,-1,0,0),
+    BackgroundColor3=Color3.fromRGB(20,20,20), BorderSizePixel=0, ZIndex=19
+}, main)
 local split = mk("Frame",{
-    Name="Split", Size=UDim2.new(1,0,1,-25), Position=UDim2.new(0,0,0,25),
-    BackgroundTransparency=1
+    Name="Split", Size=UDim2.new(1,0,1,-22), Position=UDim2.new(0,0,0,22),
+    BackgroundTransparency=1, ClipsDescendants=true,
 }, main)
 local leftCol = mk("Frame",{
-    Name="LeftCol", Size=UDim2.new(0.38,0,1,0), BackgroundTransparency=1
+    Name="LeftCol", Size=UDim2.new(1,0,1,0), BackgroundTransparency=1
 }, split)
-
--- ── Tree section (top 55%) ──────────────────────────────────────────────────
 local treeSection = mk("Frame",{
     Name="TreeSection", Size=UDim2.new(1,0,0.55,0),
     BackgroundColor3=Color3.fromRGB(30,30,30), BorderSizePixel=0
@@ -2499,18 +2599,41 @@ local searchInput = mk("TextBox",{
     TextXAlignment=Enum.TextXAlignment.Left,
     PlaceholderText="Search workspace...", Text="", TextSize=11
 }, searchFrame)
+local treeActions = mk("Frame",{
+    Size=UDim2.new(1,0,0,22), Position=UDim2.new(0,0,0,46),
+    BackgroundColor3=Color3.fromRGB(37,37,37), BorderSizePixel=0
+}, treeSection)
+local function mkActionBtn(label, xOff)
+    local b = mk("TextButton",{
+        Size=UDim2.new(0,22,0,18), Position=UDim2.fromOffset(xOff, 2),
+        BackgroundColor3=Color3.fromRGB(50,50,50), BackgroundTransparency=0.4,
+        BorderSizePixel=0,
+        Text=label, TextColor3=Color3.fromRGB(210,210,210),
+        Font=Enum.Font.SourceSansBold, TextSize=11,
+    }, treeActions)
+    b.MouseEnter:Connect(function() b.BackgroundTransparency=0; b.BackgroundColor3=Color3.fromRGB(0,100,200) end)
+    b.MouseLeave:Connect(function() b.BackgroundTransparency=0.4; b.BackgroundColor3=Color3.fromRGB(50,50,50) end)
+    return b
+end
+local refreshBtn2    = mkActionBtn("⟳",  4)
+local expandAllBtn   = mkActionBtn("+",  28)
+local collapseAllBtn = mkActionBtn("-",  52)
+local instanceCountLabel = mk("TextLabel",{
+    Size=UDim2.new(1,-80,1,0), Position=UDim2.fromOffset(78,0),
+    BackgroundTransparency=1,
+    Text="0 items",
+    TextColor3=Color3.fromRGB(100,100,100),
+    TextXAlignment=Enum.TextXAlignment.Right,
+    Font=Enum.Font.SourceSans, TextSize=10,
+}, treeActions)
 local listFrame = mk("Frame",{
-    Name="List", Size=UDim2.new(1,0,1,-46), Position=UDim2.new(0,0,0,46),
+    Name="List", Size=UDim2.new(1,0,1,-68), Position=UDim2.new(0,0,0,68),
     BackgroundTransparency=1, ClipsDescendants=true
 }, treeSection)
-
--- ── Divider between tree and properties ─────────────────────────────────────
 mk("Frame",{
     Size=UDim2.new(1,0,0,1), Position=UDim2.new(0,0,0.55,0),
     BackgroundColor3=Color3.fromRGB(55,55,55), BorderSizePixel=0
 }, leftCol)
-
--- ── Properties section (bottom 45%) ─────────────────────────────────────────
 local propsSection = mk("Frame",{
     Name="PropsSection", Size=UDim2.new(1,0,0.45,-1), Position=UDim2.new(0,0,0.55,1),
     BackgroundColor3=Color3.fromRGB(30,30,30), BorderSizePixel=0
@@ -2551,15 +2674,18 @@ local propsScroll = mk("ScrollingFrame",{
 mk("UIListLayout",{
     SortOrder=Enum.SortOrder.LayoutOrder, Padding=UDim.new(0,0)
 }, propsScroll)
-mk("Frame",{
-    Size=UDim2.new(0,1,1,0), Position=UDim2.new(0.38,0,0,0),
-    BackgroundColor3=Color3.fromRGB(55,55,55), BorderSizePixel=0
-}, split)
 local rightCol = mk("Frame",{
-    Name="RightCol", Size=UDim2.new(0.62,-1,1,0), Position=UDim2.new(0.38,1,0,0),
-    BackgroundColor3=Color3.fromRGB(22,22,22), BorderSizePixel=0
-}, split)
--- ── Header bar ───────────────────────────────────────────────────────────────
+    Name="RightCol",
+    Size=UDim2.new(0,DECOMP_W,1,0),
+    Position=UDim2.new(1,0,0,0),
+    BackgroundColor3=Color3.fromRGB(22,22,22), BorderSizePixel=0,
+    Visible=false,
+}, sg)
+local splitDivider = mk("Frame",{
+    Name="SplitDivider",
+    Size=UDim2.new(0,1,1,0), Position=UDim2.fromOffset(0,0),
+    BackgroundColor3=Color3.fromRGB(55,55,55), BorderSizePixel=0,
+}, rightCol)
 local decompHeader = mk("Frame",{
     Size=UDim2.new(1,0,0,26), BackgroundColor3=Color3.fromRGB(32,32,32),
     BorderSizePixel=0
@@ -2600,8 +2726,6 @@ local convertBtn = mk("TextButton",{
     Text="Conv GUI", TextColor3=Color3.fromRGB(200,160,255),
     Font=Enum.Font.SourceSansBold, TextSize=10
 }, decompHeader)
-
--- ── Tab bar ───────────────────────────────────────────────────────────────────
 local tabBar = mk("Frame",{
     Name="TabBar", Size=UDim2.new(1,0,0,22), Position=UDim2.new(0,0,0,26),
     BackgroundColor3=Color3.fromRGB(28,28,28), BorderSizePixel=0
@@ -2622,8 +2746,6 @@ local tabUnderline = mk("Frame",{
     Size=UDim2.new(0,70,0,2), Position=UDim2.new(0,0,1,-2),
     BackgroundColor3=Color3.fromRGB(0,120,215), BorderSizePixel=0
 }, tabBar)
-
--- ── Viewer pane ───────────────────────────────────────────────────────────────
 local viewerPane = mk("Frame",{
     Name="ViewerPane", Size=UDim2.new(1,0,1,-48), Position=UDim2.new(0,0,0,48),
     BackgroundTransparency=1, ClipsDescendants=true, Visible=true
@@ -2651,8 +2773,6 @@ local codeLabel = mk("TextLabel",{
     LayoutOrder=0,
     Text='<font color="#555555">-- zukv2 decompiler\n-- by @OverZuka</font>'
 }, codeScroll)
-
--- ── Editor pane ───────────────────────────────────────────────────────────────
 local gutterW = 36
 local editorPane = mk("Frame",{
     Name="EditorPane", Size=UDim2.new(1,0,1,-48), Position=UDim2.new(0,0,0,48),
@@ -2694,19 +2814,15 @@ local editorBox = mk("TextBox",{
 }, editorScroll)
 local resizeHandle = mk("Frame",{
     Name="ResizeHandle",
-    Size=UDim2.new(0,12,0,12), Position=UDim2.new(1,-12,1,-12),
-    BackgroundTransparency=0.4, ZIndex=15
+    Size=UDim2.new(1,0,0,5), Position=UDim2.new(0,0,1,-5),
+    BackgroundColor3=Color3.fromRGB(55,55,55),
+    BackgroundTransparency=0.6, BorderSizePixel=0, ZIndex=15
 }, main)
-mk("TextLabel",{
-    Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
-    Text="◢", TextColor3=Color3.fromRGB(130,130,130),
-    TextSize=10, ZIndex=16
-}, resizeHandle)
 sg.Parent = playerGui
+local setPanelExpanded
 local lastDecompResult = ""
 local extraCodeLabels  = {}
 local function setCodeText(raw)
-    -- destroy all existing line labels
     codeLabel.Text = ""
     for _, lbl in ipairs(extraCodeLabels) do lbl:Destroy() end
     table.clear(extraCodeLabels)
@@ -2733,56 +2849,225 @@ local function setCodeText(raw)
 end
 local function openCtxMenu(inst, screenPos)
     closeCtx()
+    local isScript    = SCRIPT_CLASSES[inst.ClassName] == true
     local isScreenGui = inst.ClassName == "ScreenGui"
-    local menuH = isScreenGui and 44 or 22
-    local menu = mk("Frame", {
-        Name="CtxMenu",
-        Size=UDim2.new(0, 160, 0, menuH),
-        Position=UDim2.fromOffset(screenPos.X, screenPos.Y),
-        BackgroundColor3=Color3.fromRGB(45,45,45),
-        BorderSizePixel=1, ZIndex=50,
-    }, sg)
-    mk("UIStroke",{Color=Color3.fromRGB(70,70,70),Thickness=1}, menu)
-    mk("UIListLayout",{SortOrder=Enum.SortOrder.LayoutOrder, Padding=UDim.new(0,0)}, menu)
-    local function makeItem(label, order, onClick)
-        local btn = mk("TextButton",{
-            Size=UDim2.new(1,0,0,22),
-            BackgroundColor3=Color3.fromRGB(45,45,45),
-            BackgroundTransparency=1,
-            BorderSizePixel=0,
-            Text="  "..label,
-            TextColor3=Color3.fromRGB(210,210,210),
-            TextXAlignment=Enum.TextXAlignment.Left,
-            Font=Enum.Font.SourceSans, TextSize=12,
-            ZIndex=51, LayoutOrder=order,
-        }, menu)
-        btn.MouseEnter:Connect(function()
-            btn.BackgroundTransparency=0
-            btn.BackgroundColor3=Color3.fromRGB(0,100,200)
-        end)
-        btn.MouseLeave:Connect(function()
-            btn.BackgroundTransparency=1
-            btn.BackgroundColor3=Color3.fromRGB(45,45,45)
-        end)
-        btn.MouseButton1Click:Connect(function()
-            closeCtx(); onClick()
-        end)
+    local isService   = pcall(function() game:GetService(inst.ClassName) end)
+        and inst.Parent == game
+    local canDelete   = inst.Parent ~= nil and inst ~= game and not isService
+    local canClone    = canDelete
+    local hasBytecode = isScript
+    local ITEMS = {}
+    local function addItem(icon, label, col, fn)
+        table.insert(ITEMS, {icon=icon, label=label, color=col, fn=fn})
     end
-    makeItem("Copy Path", 1, function()
-        local path = buildPath(inst)
-        pcall(setclipboard, path)
+    local function addSep()
+        table.insert(ITEMS, "sep")
+    end
+    addItem("🔍", "Select",              Color3.fromRGB(210,210,210), function()
+        selected = inst
+        rows = buildRows(treeRoot, 0, {})
+        renderRows(); refreshProps()
     end)
-    if isScreenGui then
-        makeItem("Convert to Script (Deep)", 2, function()
-            local output = convertGuiToScript(inst)
-            lastDecompResult = output
-            pcall(setclipboard, output)
-            codeLabel.Text = '<font color="#555555">-- Converting '..inst.Name..'…</font>'
+    addItem("📋", "Copy Path",           Color3.fromRGB(210,210,210), function()
+        pcall(setclipboard, buildPath(inst))
+    end)
+    addItem("🏷", "Copy Name",           Color3.fromRGB(210,210,210), function()
+        pcall(setclipboard, inst.Name)
+    end)
+    addItem("🔗", "Copy ClassName",      Color3.fromRGB(210,210,210), function()
+        pcall(setclipboard, inst.ClassName)
+    end)
+    addSep()
+    if hasBytecode then
+        addItem("⚙", "Decompile",        Color3.fromRGB(253,251,172), function()
+            selected = inst
+            decompTitle.Text = inst.ClassName.." › "..inst.Name.."  (decompiling…)"
             task.defer(function()
-                setCodeText(output)
-                decompTitle.Text = "ScreenGui › "..inst.Name.."  [Converted]"
+                local raw = runDecompile(inst)
+                lastDecompResult = raw
+                setCodeText(raw); setTab(false)
+                decompTitle.Text = inst.ClassName.." › "..inst.Name
+                setPanelExpanded(true)
             end)
         end)
+        addItem("▶", "Execute Script",   Color3.fromRGB(160,255,160), function()
+            local ok2, bc = pcall(getscriptbytecode, inst)
+            if ok2 and bc ~= "" then
+                local fn2, err = loadstring(bc)
+                if fn2 then task.spawn(fn2)
+                else warn("[zukv2] exec: "..tostring(err)) end
+            end
+        end)
+        addSep()
+    end
+    if isScreenGui then
+        addItem("🖼", "Convert GUI→Script", Color3.fromRGB(200,160,255), function()
+            task.defer(function()
+                local output = convertGuiToScript(inst)
+                lastDecompResult = output
+                pcall(setclipboard, output)
+                setCodeText(output)
+                decompTitle.Text = "ScreenGui › "..inst.Name.."  [Converted]"
+                setPanelExpanded(true)
+            end)
+        end)
+        addSep()
+    end
+    addItem("▸", "Expand Children",     Color3.fromRGB(180,210,255), function()
+        local ok2, ch = pcall(inst.GetChildren, inst)
+        if ok2 then for _, c in ipairs(ch) do expanded[c] = true end end
+        expanded[inst] = true
+        rows = buildRows(treeRoot, 0, {}); renderRows()
+    end)
+    addItem("▾", "Collapse Children",   Color3.fromRGB(180,210,255), function()
+        local ok2, ch = pcall(inst.GetChildren, inst)
+        if ok2 then for _, c in ipairs(ch) do expanded[c] = false end end
+        rows = buildRows(treeRoot, 0, {}); renderRows()
+    end)
+    addItem("🔼", "Jump to Parent",     Color3.fromRGB(180,210,255), function()
+        if inst.Parent and inst.Parent ~= game then
+            jumpToInstance(inst.Parent)
+            refreshProps()
+        end
+    end)
+    addSep()
+    if canClone then
+        addItem("⧉", "Clone",           Color3.fromRGB(210,210,210), function()
+            local ok2, cl = pcall(function() return inst:Clone() end)
+            if ok2 and cl then
+                cl.Parent = inst.Parent
+                rows = buildRows(treeRoot, 0, {}); renderRows()
+            end
+        end)
+    end
+    addItem("✏", "Rename…",            Color3.fromRGB(210,210,210), function()
+        local ok2, oldName = pcall(function() return inst.Name end)
+        if not ok2 then return end
+        local overlay = mk("Frame",{
+            Size=UDim2.new(1,0,1,0), BackgroundTransparency=0.5,
+            BackgroundColor3=Color3.fromRGB(0,0,0), ZIndex=100,
+        }, sg)
+        local box = mk("Frame",{
+            Size=UDim2.new(0,280,0,60),
+            Position=UDim2.new(0.5,-140,0.5,-30),
+            BackgroundColor3=Color3.fromRGB(40,40,40), BorderSizePixel=0, ZIndex=101,
+        }, overlay)
+        mk("UICorner",{CornerRadius=UDim.new(0,6)}, box)
+        mk("TextLabel",{
+            Size=UDim2.new(1,-10,0,22), Position=UDim2.new(0,5,0,2),
+            BackgroundTransparency=1, Text="Rename: "..oldName,
+            TextColor3=Color3.fromRGB(170,170,170),
+            TextXAlignment=Enum.TextXAlignment.Left,
+            Font=Enum.Font.SourceSansBold, TextSize=11, ZIndex=102,
+        }, box)
+        local inp = mk("TextBox",{
+            Size=UDim2.new(1,-10,0,24), Position=UDim2.new(0,5,0,28),
+            BackgroundColor3=Color3.fromRGB(25,25,25), BorderSizePixel=1,
+            Text=oldName, TextColor3=Color3.fromRGB(230,230,230),
+            TextXAlignment=Enum.TextXAlignment.Left,
+            Font=Enum.Font.Code, TextSize=12, ZIndex=102,
+            ClearTextOnFocus=false,
+        }, box)
+        inp:CaptureFocus()
+        inp.FocusLost:Connect(function(enter)
+            if enter then
+                local newName = inp.Text:match("^%s*(.-)%s*$")
+                if newName ~= "" then pcall(function() inst.Name = newName end) end
+            end
+            overlay:Destroy()
+            rows = buildRows(treeRoot, 0, {}); renderRows()
+        end)
+    end)
+    if canDelete then
+        addItem("🗑", "Delete",          Color3.fromRGB(255,100,100), function()
+            pcall(function() inst:Destroy() end)
+            if selected == inst then selected = nil end
+            rows = buildRows(treeRoot, 0, {}); renderRows(); refreshProps()
+        end)
+    end
+    local ITEM_H = 20
+    local SEP_H  = 7
+    local totalH = 0
+    for _, item in ipairs(ITEMS) do
+        totalH += (item == "sep") and SEP_H or ITEM_H
+    end
+    local cam      = workspace.CurrentCamera
+    local screenH  = cam and cam.ViewportSize.Y or 800
+    local screenW  = cam and cam.ViewportSize.X or 1280
+    local menuY    = math.min(screenPos.Y, screenH - totalH - 6)
+    local menuX    = math.min(screenPos.X, screenW - 186)
+    local menu = mk("Frame", {
+        Name="CtxMenu",
+        Size=UDim2.new(0,182,0,totalH+2),
+        Position=UDim2.fromOffset(menuX, menuY),
+        BackgroundColor3=Color3.fromRGB(36,36,36),
+        BorderSizePixel=0, ZIndex=60,
+        ClipsDescendants=true,
+    }, sg)
+    mk("UICorner",{CornerRadius=UDim.new(0,5)}, menu)
+    mk("UIStroke",{Color=Color3.fromRGB(65,65,65),Thickness=1}, menu)
+    mk("UIListLayout",{SortOrder=Enum.SortOrder.LayoutOrder,
+        Padding=UDim.new(0,0)}, menu)
+    local ord = 0
+    for _, item in ipairs(ITEMS) do
+        ord += 1
+        if item == "sep" then
+            mk("Frame",{
+                Size=UDim2.new(1,-16,0,1),
+                BackgroundColor3=Color3.fromRGB(60,60,60),
+                BackgroundTransparency=0, BorderSizePixel=0,
+                LayoutOrder=ord,
+            }, menu)
+            local sep = menu:FindFirstChild(tostring(ord))
+            local spacer = mk("Frame",{
+                Size=UDim2.new(1,0,0,SEP_H),
+                BackgroundTransparency=1, BorderSizePixel=0,
+                LayoutOrder=ord,
+            }, menu)
+            mk("Frame",{
+                Size=UDim2.new(1,-16,0,1),
+                Position=UDim2.new(0,8,0.5,-1),
+                BackgroundColor3=Color3.fromRGB(58,58,58),
+                BorderSizePixel=0,
+            }, spacer)
+        else
+            local btn = mk("TextButton",{
+                Size=UDim2.new(1,0,0,ITEM_H),
+                BackgroundColor3=Color3.fromRGB(36,36,36),
+                BackgroundTransparency=1,
+                BorderSizePixel=0,
+                Text="",
+                ZIndex=61, LayoutOrder=ord,
+            }, menu)
+            mk("TextLabel",{
+                Size=UDim2.new(0,20,1,0), Position=UDim2.new(0,5,0,0),
+                BackgroundTransparency=1,
+                Text=item.icon,
+                TextColor3=item.color,
+                TextXAlignment=Enum.TextXAlignment.Center,
+                Font=Enum.Font.SourceSans, TextSize=12, ZIndex=62,
+            }, btn)
+            mk("TextLabel",{
+                Size=UDim2.new(1,-28,1,0), Position=UDim2.new(0,26,0,0),
+                BackgroundTransparency=1,
+                Text=item.label,
+                TextColor3=item.color,
+                TextXAlignment=Enum.TextXAlignment.Left,
+                Font=Enum.Font.SourceSans, TextSize=12, ZIndex=62,
+            }, btn)
+            btn.MouseEnter:Connect(function()
+                btn.BackgroundTransparency=0
+                btn.BackgroundColor3=Color3.fromRGB(0,100,210)
+            end)
+            btn.MouseLeave:Connect(function()
+                btn.BackgroundTransparency=1
+                btn.BackgroundColor3=Color3.fromRGB(36,36,36)
+            end)
+            local fn = item.fn
+            btn.MouseButton1Click:Connect(function()
+                closeCtx(); fn()
+            end)
+        end
     end
     ctxMenu = menu
 end
@@ -2802,6 +3087,7 @@ end
 local function renderRows()
     for _, f in ipairs(rowFrames) do f:Destroy() end
     table.clear(rowFrames)
+    instanceCountLabel.Text = #rows .. " item" .. (#rows == 1 and "" or "s")
     local visH   = listFrame.AbsoluteSize.Y
     local startI = math.floor(scrollOffset / ROW_H) + 1
     local endI   = math.min(#rows, startI + math.ceil(visH / ROW_H) + 1)
@@ -2822,8 +3108,27 @@ local function renderRows()
             Position=UDim2.fromOffset(row.depth*INDENT_PER+4,0),
             BackgroundTransparency=1
         }, entry)
+        local iconData = CLASS_ICONS[inst.ClassName]
+        local iconW = 0
+        if iconData then
+            iconW = 18
+            local ico = Instance.new("ImageLabel")
+            ico.Size                  = UDim2.fromOffset(ICON_SIZE, ICON_SIZE)
+            ico.Position              = UDim2.fromOffset(1, math.floor((ROW_H - ICON_SIZE) / 2))
+            ico.BackgroundTransparency= 1
+            ico.ScaleType             = Enum.ScaleType.Fit
+            ico.ZIndex                = 2
+            if type(iconData) == "string" then
+                ico.Image = iconData
+            else
+                ico.Image           = iconData.sheet
+                ico.ImageRectOffset = Vector2.new(iconData.ox, iconData.oy)
+                ico.ImageRectSize   = Vector2.new(16, 16)
+            end
+            ico.Parent = indent
+        end
         mk("TextLabel",{
-            Size=UDim2.new(1,-20,1,0), Position=UDim2.fromOffset(20,0),
+            Size=UDim2.new(1,-(iconW+2),1,0), Position=UDim2.fromOffset(iconW+2,0),
             BackgroundTransparency=1,
             Text=inst.Name,
             TextColor3=isScript and Color3.fromRGB(253,251,172) or Color3.fromRGB(220,220,220),
@@ -2890,6 +3195,7 @@ decompBtn.MouseButton1Click:Connect(function()
         decompTitle.Text = selected.ClassName .. " › " .. selected.Name
         decompBtn.Text   = "View"
         decompBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+        setPanelExpanded(true)
     end)
 end)
 local copyResetPending = false
@@ -2921,8 +3227,6 @@ execBtn.MouseButton1Click:Connect(function()
         task.delay(2, function() execBtn.Text = "Execute" end)
     end
 end)
-
--- ── Tab switching ─────────────────────────────────────────────────────────────
 local function setTab(toEditor)
     if toEditor then
         viewerPane.Visible  = false
@@ -2932,7 +3236,6 @@ local function setTab(toEditor)
         tabEditor.BackgroundColor3 = Color3.fromRGB(22,22,22)
         tabEditor.TextColor3       = Color3.fromRGB(220,220,220)
         tabUnderline.Position      = UDim2.new(0,70,1,-2)
-        -- copy viewer content into editor if editor is blank
         if editorBox.Text == "-- Write your script here\n" and lastDecompResult ~= "" then
             editorBox.Text = lastDecompResult
         end
@@ -2948,24 +3251,19 @@ local function setTab(toEditor)
 end
 tabViewer.MouseButton1Click:Connect(function() setTab(false) end)
 tabEditor.MouseButton1Click:Connect(function() setTab(true) end)
-setTab(false) -- start on viewer
-
--- ── Gutter line numbers ───────────────────────────────────────────────────────
+setTab(false)
 local gutterLabels = {}
 local lastLineCount = 0
 local LINE_H = 16
-
 local function updateGutter()
     local text = editorBox.Text
     local lineCount = 1
     for _ in text:gmatch("\n") do lineCount += 1 end
     if lineCount == lastLineCount then return end
     lastLineCount = lineCount
-    -- remove excess
     for i = lineCount + 1, #gutterLabels do
         gutterLabels[i]:Destroy(); gutterLabels[i] = nil
     end
-    -- add new
     for i = #gutterLabels + 1, lineCount do
         local lbl = mk("TextLabel",{
             Size=UDim2.new(1,0,0,LINE_H),
@@ -2979,18 +3277,13 @@ local function updateGutter()
         gutterLabels[i] = lbl
     end
 end
-
--- sync gutter scroll to editor scroll
 editorScroll:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
     gutterScroll.CanvasPosition = Vector2.new(0, editorScroll.CanvasPosition.Y)
 end)
-
 editorBox:GetPropertyChangedSignal("Text"):Connect(function()
     updateGutter()
 end)
 updateGutter()
-
--- ── Copy button: copies editor text when on editor tab ───────────────────────
 convertBtn.MouseButton1Click:Connect(function()
     if not selected then
         codeLabel.Text = '<font color="#ff6060">-- No instance selected.</font>'
@@ -3010,14 +3303,13 @@ convertBtn.MouseButton1Click:Connect(function()
         decompTitle.Text = "ScreenGui › " .. selected.Name .. "  [Converted]"
         convertBtn.Text = "Conv GUI"
         convertBtn.BackgroundColor3 = Color3.fromRGB(50,40,70)
+        setPanelExpanded(true)
     end)
 end)
--- ── Properties panel ────────────────────────────────────────────────────────
 local propRowFrames = {}
 local propsFilterText = ""
 local PROPS_ROW_H = 18
 local SKIP_PROP_TYPES = { RBXScriptSignal=true, Instance=true }
-
 local function serializeValShort(v)
     local t = typeof(v)
     if t == "string"     then return #v > 40 and ('"'..v:sub(1,37)..'..."') or string.format("%q",v)
@@ -3037,31 +3329,25 @@ local function serializeValShort(v)
     elseif t == "FontFace" then return v.Family:match("[^/]+$") or "Font"
     else return t end
 end
-
 local function getTypeColor(v)
     local t = typeof(v)
     if t == "string"   then return Color3.fromRGB(173,241,149)
     elseif t == "number" then return Color3.fromRGB(255,198,0)
     elseif t == "boolean" then return Color3.fromRGB(255,198,0)
-    elseif t == "Color3" then return v  -- swatch
+    elseif t == "Color3" then return v
     elseif t == "EnumItem" then return Color3.fromRGB(132,214,247)
     else return Color3.fromRGB(180,180,180) end
 end
-
 refreshProps = function()
     for _, f in ipairs(propRowFrames) do f:Destroy() end
     table.clear(propRowFrames)
     if not selected then return end
     local inst = selected
-
-    -- Build property list: executor API first, then hardcoded class map
     local allPropNames = {}
     local seen = {}
     local function addProp(name)
         if not seen[name] then seen[name] = true; table.insert(allPropNames, name) end
     end
-
-    -- 1) getproperties (Synapse X / most modern executors)
     if type(getgenv().getproperties) == "function" then
         local ok2, result = pcall(getgenv().getproperties, inst)
         if ok2 and type(result) == "table" then
@@ -3071,25 +3357,16 @@ refreshProps = function()
             end
         end
     end
-
-    -- 2) gethiddenproperty enumeration isn't a list API, skip
-
-    -- 3) Hardcoded class-aware map — covers the vast majority of cases
     if #allPropNames == 0 then
         local cls = inst.ClassName
-        -- Universal base props every Instance has
         local base = {"Name","ClassName","Parent","Archivable"}
         for _, p in ipairs(base) do addProp(p) end
-
         local classProps = {
-            -- GuiBase2d
             GuiBase2d = {"AbsolutePosition","AbsoluteSize","AbsoluteRotation","AutoLocalize"},
-            -- GuiObject (all visible GUI elements inherit this)
             GuiObject = {"Active","AnchorPoint","AutomaticSize","BackgroundColor3",
                 "BackgroundTransparency","BorderColor3","BorderSizePixel","ClipsDescendants",
                 "LayoutOrder","Position","Rotation","Selectable","Size","SizeConstraint",
                 "Visible","ZIndex"},
-            -- Text-based
             TextLabel = {"Font","FontFace","LineHeight","MaxVisibleGraphemes","RichText","Text",
                 "TextBounds","TextColor3","TextFits","TextScaled","TextSize","TextStrokeColor3",
                 "TextStrokeTransparency","TextTransparency","TextTruncate","TextWrapped",
@@ -3103,22 +3380,18 @@ refreshProps = function()
                 "TextStrokeTransparency","TextTransparency","TextTruncate","TextWrapped",
                 "TextXAlignment","TextYAlignment","ClearTextOnFocus","MultiLine",
                 "PlaceholderColor3","PlaceholderText","TextEditable"},
-            -- Frames
             Frame = {"Style"},
             ScrollingFrame = {"CanvasPosition","CanvasSize","ScrollBarImageColor3",
                 "ScrollBarImageTransparency","ScrollBarThickness","ScrollingDirection",
                 "ScrollingEnabled","VerticalScrollBarInset","HorizontalScrollBarInset",
                 "BottomImage","MidImage","TopImage"},
-            -- Images
             ImageLabel = {"Image","ImageColor3","ImageRectOffset","ImageRectSize",
                 "ImageTransparency","ResampleMode","ScaleType","SliceCenter","SliceScale","TileSize"},
             ImageButton = {"Image","ImageColor3","ImageRectOffset","ImageRectSize",
                 "ImageTransparency","ResampleMode","ScaleType","SliceCenter","SliceScale","TileSize",
                 "HoverImage","PressedImage","AutoButtonColor","Modal","Style"},
-            -- ScreenGui
             ScreenGui = {"DisplayOrder","Enabled","IgnoreGuiInset","ResetOnSpawn",
                 "ScreenInsets","ZIndexBehavior"},
-            -- UI layout/decoration
             UICorner = {"CornerRadius"},
             UIStroke = {"ApplyStrokeMode","Color","Enabled","LineJoinMode","Thickness","Transparency"},
             UIGradient = {"Color","Enabled","Offset","Rotation","Transparency"},
@@ -3131,22 +3404,18 @@ refreshProps = function()
             UIAspectRatioConstraint = {"AspectRatio","AspectType","DominantAxis"},
             UISizeConstraint = {"MaxSize","MinSize"},
             UITextSizeConstraint = {"MaxTextSize","MinTextSize"},
-            -- Parts
             BasePart = {"Anchored","CanCollide","CastShadow","CFrame","Color","Locked",
                 "Material","Reflectance","Size","Transparency","BrickColor","Massless",
                 "CollisionGroupId","RootPriority"},
             Part = {"Shape"},
             MeshPart = {"MeshId","TextureID"},
-            -- Humanoid
             Humanoid = {"DisplayName","Health","HipHeight","JumpHeight","JumpPower",
                 "MaxHealth","MaxSlopeAngle","RootPart","WalkSpeed","AutoRotate",
                 "BreakJointsOnDeath","DisplayDistanceType","HealthDisplayDistance",
                 "NameDisplayDistance","NameOcclusion","RequiresNeck","RigType"},
-            -- Scripts
             Script = {"Disabled","LinkedSource","RunContext","Source"},
             LocalScript = {"Disabled","LinkedSource","Source"},
             ModuleScript = {"LinkedSource","Source"},
-            -- Values
             StringValue = {"Value"},
             IntValue = {"Value"},
             NumberValue = {"Value"},
@@ -3154,21 +3423,16 @@ refreshProps = function()
             Vector3Value = {"Value"},
             Color3Value = {"Value"},
             ObjectValue = {"Value"},
-            -- Sound
             Sound = {"Looped","MaxDistance","Pitch","PlayOnRemove","Playing",
                 "RollOffMaxDistance","RollOffMinDistance","RollOffMode","SoundId",
                 "TimeLength","TimePosition","Volume"},
-            -- Lighting
             Lighting = {"Ambient","Brightness","ClockTime","ColorShift_Bottom",
                 "ColorShift_Top","EnvironmentDiffuseScale","EnvironmentSpecularScale",
                 "ExposureCompensation","FogColor","FogEnd","FogStart",
                 "GeographicLatitude","GlobalShadows","OutdoorAmbient","ShadowSoftness","TimeOfDay"},
-            -- Camera
             Camera = {"CFrame","CameraSubject","CameraType","FieldOfView",
                 "Focus","HeadLocked","HeadScale","MaxAxisFieldOfView","NearPlaneZ","ViewportSize"},
         }
-
-        -- inheritance chain lookup
         local chain = {
             TextLabel  = {"GuiBase2d","GuiObject","TextLabel"},
             TextButton = {"GuiBase2d","GuiObject","TextButton"},
@@ -3215,7 +3479,6 @@ refreshProps = function()
             BackgroundTransparency=0, BorderSizePixel=0,
             LayoutOrder=order, ClipsDescendants=true
         }, propsScroll)
-
         mk("TextLabel",{
             Size=UDim2.new(0.5,0,1,0), Position=UDim2.new(0,4,0,0),
             BackgroundTransparency=1,
@@ -3225,11 +3488,8 @@ refreshProps = function()
             Font=Enum.Font.SourceSans, TextSize=11,
             TextTruncate=Enum.TextTruncate.AtEnd,
         }, row)
-
         local valType = typeof(val)
         local valColor = valType=="Color3" and Color3.fromRGB(180,180,180) or getTypeColor(val)
-
-        -- value display label (right half)
         local valLabel = mk("TextLabel",{
             Size=UDim2.new(0.5,-2,1,0), Position=UDim2.new(0.5,0,0,0),
             BackgroundTransparency=1,
@@ -3239,8 +3499,6 @@ refreshProps = function()
             Font=Enum.Font.SourceSans, TextSize=11,
             TextTruncate=Enum.TextTruncate.AtEnd,
         }, row)
-
-        -- color swatch overlay for Color3
         local swatch
         if valType == "Color3" then
             swatch = mk("Frame",{
@@ -3252,15 +3510,11 @@ refreshProps = function()
             valLabel.Position = UDim2.new(0.5,15,0,0)
             valLabel.Size     = UDim2.new(0.5,-17,1,0)
         end
-
-        -- ── Edit logic per type ──────────────────────────────────────────────
-        local activeEdit = nil  -- currently open inline editor for this row
-
+        local activeEdit = nil
         local function closeEdit()
             if activeEdit then activeEdit:Destroy(); activeEdit = nil end
             row.Size = UDim2.new(1,0,0,PROPS_ROW_H)
         end
-
         local function applyVal(newVal)
             local ok, err = pcall(function() inst[propName] = newVal end)
             if ok then
@@ -3275,7 +3529,6 @@ refreshProps = function()
             end
             closeEdit()
         end
-
         local function makeInlineBox(startText, onConfirm)
             closeEdit()
             row.Size = UDim2.new(1,0,0,PROPS_ROW_H+2)
@@ -3296,36 +3549,27 @@ refreshProps = function()
             end)
             return box
         end
-
-        -- clickable value area
         local hitbox = mk("TextButton",{
             Size=UDim2.new(0.5,0,1,0), Position=UDim2.new(0.5,0,0,0),
             BackgroundTransparency=1, Text="", ZIndex=3
         }, row)
-
         hitbox.MouseEnter:Connect(function()
             row.BackgroundColor3 = Color3.fromRGB(45,45,55)
         end)
         hitbox.MouseLeave:Connect(function()
             row.BackgroundColor3 = isEven and Color3.fromRGB(28,28,28) or Color3.fromRGB(33,33,33)
         end)
-
         hitbox.MouseButton1Click:Connect(function()
             if valType == "boolean" then
-                -- toggle
                 applyVal(not inst[propName])
-
             elseif valType == "string" then
                 makeInlineBox(inst[propName], function(t) applyVal(t) end)
-
             elseif valType == "number" then
                 makeInlineBox(tostring(inst[propName]), function(t)
                     local n = tonumber(t)
                     if n then applyVal(n) else closeEdit() end
                 end)
-
             elseif valType == "EnumItem" then
-                -- cycle through enum values
                 local ok2, items = pcall(function()
                     return inst[propName].EnumType:GetEnumItems()
                 end)
@@ -3339,9 +3583,7 @@ refreshProps = function()
                     end
                     applyVal(nextItem)
                 end
-
             elseif valType == "Color3" then
-                -- open a small RGB popup
                 closeEdit()
                 row.Size = UDim2.new(1,0,0,PROPS_ROW_H + 22)
                 local popup = mk("Frame",{
@@ -3387,7 +3629,6 @@ refreshProps = function()
                         math.clamp(b2,0,255)
                     ))
                 end)
-
             elseif valType == "Vector3" then
                 local cur = inst[propName]
                 makeInlineBox(("%.4g,%.4g,%.4g"):format(cur.X,cur.Y,cur.Z), function(t)
@@ -3395,7 +3636,6 @@ refreshProps = function()
                     local nx,ny,nz = tonumber(x),tonumber(y),tonumber(z)
                     if nx and ny and nz then applyVal(Vector3.new(nx,ny,nz)) else closeEdit() end
                 end)
-
             elseif valType == "Vector2" then
                 local cur = inst[propName]
                 makeInlineBox(("%.4g,%.4g"):format(cur.X,cur.Y), function(t)
@@ -3403,7 +3643,6 @@ refreshProps = function()
                     local nx,ny = tonumber(x),tonumber(y)
                     if nx and ny then applyVal(Vector2.new(nx,ny)) else closeEdit() end
                 end)
-
             elseif valType == "UDim2" then
                 local cur = inst[propName]
                 makeInlineBox(("%.4g,%.4g,%.4g,%.4g"):format(
@@ -3414,7 +3653,6 @@ refreshProps = function()
                         applyVal(UDim2.new(na,nb,nc,nd))
                     else closeEdit() end
                 end)
-
             elseif valType == "UDim" then
                 local cur = inst[propName]
                 makeInlineBox(("%.4g,%.4g"):format(cur.Scale,cur.Offset), function(t)
@@ -3422,7 +3660,6 @@ refreshProps = function()
                     local ns,no = tonumber(s),tonumber(o)
                     if ns and no then applyVal(UDim.new(ns,no)) else closeEdit() end
                 end)
-
             elseif valType == "BrickColor" then
                 makeInlineBox(inst[propName].Name, function(t)
                     local ok3, bc = pcall(BrickColor.new, t)
@@ -3430,49 +3667,60 @@ refreshProps = function()
                 end)
             end
         end)
-
         table.insert(propRowFrames, row)
     end
 end
-
 propsSearchInput:GetPropertyChangedSignal("Text"):Connect(function()
     propsFilterText = propsSearchInput.Text
     refreshProps()
 end)
-
 for i, svcName in ipairs(QUICK_NAV_SERVICES) do
-    -- quickNav removed; services accessible via tree directly
 end
 closeBtn.MouseButton1Click:Connect(function() sg:Destroy() end)
-local dragging, dragStart, startPos
-topBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        closeCtx(); dragging=true
-        dragStart=input.Position; startPos=main.Position
+local TweenService = game:GetService("TweenService")
+local TWEEN_INFO   = TweenInfo.new(0.18, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+setPanelExpanded = function(expand)
+    panelExpanded = expand
+    if expand then
+        rightCol.Visible = true
+        TweenService:Create(rightCol, TWEEN_INFO, {
+            Position = UDim2.new(1, -(PANEL_W + DECOMP_W), 0, 0),
+        }):Play()
+        toggleBtn.Text = "◀"
+    else
+        local tw = TweenService:Create(rightCol, TWEEN_INFO, {
+            Position = UDim2.new(1, 0, 0, 0),
+        })
+        tw:Play()
+        tw.Completed:Connect(function()
+            if not panelExpanded then
+                rightCol.Visible = false
+            end
+        end)
+        toggleBtn.Text = "▶"
     end
+end
+toggleBtn.MouseButton1Click:Connect(function()
+    setPanelExpanded(not panelExpanded)
 end)
-local resizing, resStart, resSize
+local resizing, resStart, resStartH
 resizeHandle.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        closeCtx(); resizing=true
-        resStart=input.Position; resSize=main.Size
+        resizing=true; resStart=input.Position
+        resStartH = main.AbsoluteSize.Y
     end
 end)
 UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local d = input.Position - dragStart
-        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset+d.X,
-                                   startPos.Y.Scale, startPos.Y.Offset+d.Y)
-    elseif resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+    if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
         local d = input.Position - resStart
-        main.Size = UDim2.new(0, math.max(MIN_SIZE.X, resSize.X.Offset+d.X),
-                               0, math.max(MIN_SIZE.Y, resSize.Y.Offset+d.Y))
+        local newH = math.max(300, resStartH + d.Y)
+        main.Size = UDim2.new(0, main.AbsoluteSize.X, 0, newH)
         renderRows()
     end
 end)
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging=false; resizing=false
+        resizing=false
     end
 end)
 listFrame.InputChanged:Connect(function(input)
@@ -3489,18 +3737,28 @@ searchInput:GetPropertyChangedSignal("Text"):Connect(function()
     filterText=searchInput.Text; scrollOffset=0
     rows=buildRows(treeRoot,0,{}); renderRows()
 end)
+refreshBtn2.MouseButton1Click:Connect(function()
+    rows = buildRows(treeRoot, 0, {})
+    renderRows()
+end)
+local function expandAllRecursive(inst)
+    local ok, ch = pcall(inst.GetChildren, inst)
+    if ok and #ch > 0 then
+        expanded[inst] = true
+        for _, c in ipairs(ch) do expandAllRecursive(c) end
+    end
+end
+expandAllBtn.MouseButton1Click:Connect(function()
+    expandAllRecursive(treeRoot)
+    rows = buildRows(treeRoot, 0, {})
+    renderRows()
+end)
+collapseAllBtn.MouseButton1Click:Connect(function()
+    expanded = {}
+    expanded[game] = true
+    rows = buildRows(treeRoot, 0, {})
+    renderRows()
+end)
 expanded[game] = true
-
-
 rows = buildRows(treeRoot, 0, {})
 renderRows()
-  
-    
- --[[
-            _           ____   ™ 
-  _____   _| | ____   _|___ \  
- |_  / | | | |/ /\ \ / / __) | 
-  / /| |_| |   <  \ V / / __/  
- /___|\__,_|_|\_\  \_/ |_____| 
-                               
---]]
