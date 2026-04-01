@@ -2140,7 +2140,7 @@ end
 local ROW_H      = 17
 local INDENT_PER = 14
 local MIN_SIZE   = Vector2.new(350, 250)
-local ICON_SIZE = 14
+local ICON_SIZE = 12
 local CLASS_ICONS = {}
 local function buildIconTable()
     if type(getgenv().getclassicons) == "function" then
@@ -2295,6 +2295,7 @@ local function buildIconTable()
     end
 end
 buildIconTable()
+
 local QUICK_NAV_SERVICES = {
     "Workspace","Players","Lighting","ReplicatedFirst",
     "ReplicatedStorage","StarterGui","StarterPack",
@@ -2332,8 +2333,6 @@ local function buildPath(inst)
     local svcName = parts[1]
     local root = ('game:GetService("%s")'):format(svcName)
     if #parts == 1 then return root end
-    -- Build the rest of the path, using bracket notation for names
-    -- that contain spaces, start with a digit, or have non-identifier chars
     local function needsBracket(name)
         return not name:match("^[%a_][%w_]*$")
     end
@@ -2580,7 +2579,7 @@ local function runDecompile(inst)
     local opts = {
         EnabledRemarks       = { ColdRemark=true, InlineRemark=true },
         DecompilerTimeout    = 10,
-        DecompilerMode       = "lift",
+        DecompilerMode       = "disasm",
         ReaderFloatPrecision = 7,
         ShowDebugInformation = false,
         ShowInstructionLines = true,
@@ -2616,36 +2615,38 @@ local main = mk("Frame", {
     Name="Main",
     Size=UDim2.new(0, PANEL_W, 1, 0),
     Position=UDim2.new(1, -PANEL_W, 0, 0),
-    BackgroundColor3=Color3.fromRGB(35,35,35), BorderSizePixel=0,
+    BackgroundColor3=Color3.fromRGB(35,35,35), BorderSizePixel=4.5,
+    BackgroundTransparency = 0.6,
     ClipsDescendants=false,
 }, sg)
 mk("UIStroke",{Color=Color3.fromRGB(60,60,60),Thickness=1}, main)
 local topBar = mk("Frame",{
     Name="TopBar", Size=UDim2.new(1,0,0,22),
-    BackgroundColor3=Color3.fromRGB(42,42,42), BorderSizePixel=0
+    BackgroundColor3=Color3.fromRGB(35,35,35), BorderSizePixel=4.5,
+    BackgroundTransparency = 0.6,
 }, main)
 mk("TextLabel",{
     Name="Title", Size=UDim2.new(1,-50,1,0), Position=UDim2.new(0,8,0,0),
-    BackgroundTransparency=1, Text="zukv2",
+    BackgroundTransparency=1, Text="Zex + Made By @OverZuka",
     TextColor3=Color3.fromRGB(200,200,200), TextXAlignment=Enum.TextXAlignment.Left,
-    Font=Enum.Font.SourceSansBold, TextSize=9
+    Font=Enum.Font.SourceSansBold, TextSize=14
 }, topBar)
 local closeBtn = mk("TextButton",{
     Name="Close", Size=UDim2.new(0,22,0,18), Position=UDim2.new(1,-24,0,2),
-    BackgroundColor3=Color3.fromRGB(180,50,50), BackgroundTransparency=0.3,
+    BackgroundColor3=Color3.fromRGB(180,50,50), BackgroundTransparency=0.6,
     Text="X", TextColor3=Color3.fromRGB(255,255,255), BorderSizePixel=0,
-    Font=Enum.Font.SourceSansBold, TextSize=11
+    Font=Enum.Font.SourceSansBold, TextSize=12
 }, topBar)
 local toggleBtn = mk("TextButton",{
     Name="ToggleBtn",
     Size=UDim2.new(0,18,0,48),
     Position=UDim2.new(0,-18,0.5,-24),
     BackgroundColor3=Color3.fromRGB(42,42,42),
-    BackgroundTransparency=0,
+    BackgroundTransparency=0.5,
     BorderSizePixel=0,
     Text="<",
     TextColor3=Color3.fromRGB(180,180,180),
-    Font=Enum.Font.SourceSansBold, TextSize=9,
+    Font=Enum.Font.SourceSansBold, TextSize=10,
     ZIndex=20,
 }, main)
 mk("UICorner",{CornerRadius=UDim.new(0,4)}, toggleBtn)
@@ -2687,7 +2688,7 @@ local searchInput = mk("TextBox",{
     Name="Input", Size=UDim2.new(1,-10,1,0), Position=UDim2.new(0,5,0,0),
     BackgroundTransparency=1, TextColor3=Color3.fromRGB(255,255,255),
     TextXAlignment=Enum.TextXAlignment.Left,
-    PlaceholderText="Search workspace...", Text="", TextSize=9
+    PlaceholderText="Search...", Text="", TextSize=7
 }, searchFrame)
 local treeActions = mk("Frame",{
     Size=UDim2.new(1,0,0,22), Position=UDim2.new(0,0,0,46),
@@ -2714,7 +2715,7 @@ local instanceCountLabel = mk("TextLabel",{
     Text="0 items",
     TextColor3=Color3.fromRGB(100,100,100),
     TextXAlignment=Enum.TextXAlignment.Right,
-    Font=Enum.Font.SourceSans, TextSize=9,
+    Font=Enum.Font.SourceSans, TextSize=11,
 }, treeActions)
 local listFrame = mk("Frame",{
     Name="List", Size=UDim2.new(1,0,1,-68), Position=UDim2.new(0,0,0,68),
@@ -2751,13 +2752,13 @@ local propsSearchInput = mk("TextBox",{
     Name="PropsSearch", Size=UDim2.new(1,-10,1,0), Position=UDim2.new(0,5,0,0),
     BackgroundTransparency=1, TextColor3=Color3.fromRGB(255,255,255),
     TextXAlignment=Enum.TextXAlignment.Left,
-    PlaceholderText="Search properties...", Text="", TextSize=9
+    PlaceholderText="Search...", Text="", TextSize=7
 }, propsSearchFrame)
 local propsScroll = mk("ScrollingFrame",{
     Name="PropsScroll",
     Size=UDim2.new(1,0,1,-46), Position=UDim2.new(0,0,0,46),
     BackgroundTransparency=1, BorderSizePixel=0,
-    ScrollBarThickness=3, ScrollBarImageColor3=Color3.fromRGB(70,70,70),
+    ScrollBarThickness=5, ScrollBarImageColor3=Color3.fromRGB(70,70,70),
     CanvasSize=UDim2.new(0,0,0,0), AutomaticCanvasSize=Enum.AutomaticSize.Y,
     ClipsDescendants=true
 }, propsSection)
@@ -2793,28 +2794,28 @@ local decompBtn = mk("TextButton",{
     Size=UDim2.new(0,60,0,20), Position=UDim2.new(1,-65,0,3),
     BackgroundColor3=Color3.fromRGB(50,50,50), BorderSizePixel=0,
     Text="View", TextColor3=Color3.fromRGB(255,255,255),
-    Font=Enum.Font.SourceSansBold, TextSize=9
+    Font=Enum.Font.SourceSansBold, TextSize=11
 }, decompHeader)
 local copyBtn = mk("TextButton",{
     Name="CopyBtn",
     Size=UDim2.new(0,50,0,20), Position=UDim2.new(1,-120,0,3),
     BackgroundColor3=Color3.fromRGB(50,50,50), BorderSizePixel=0,
     Text="Copy", TextColor3=Color3.fromRGB(210,210,210),
-    Font=Enum.Font.SourceSansBold, TextSize=9
+    Font=Enum.Font.SourceSansBold, TextSize=11
 }, decompHeader)
 local execBtn = mk("TextButton",{
     Name="ExecBtn",
     Size=UDim2.new(0,60,0,20), Position=UDim2.new(1,-185,0,3),
     BackgroundColor3=Color3.fromRGB(40,70,40), BorderSizePixel=0,
     Text="Execute", TextColor3=Color3.fromRGB(160,255,160),
-    Font=Enum.Font.SourceSansBold, TextSize=9
+    Font=Enum.Font.SourceSansBold, TextSize=11
 }, decompHeader)
 local convertBtn = mk("TextButton",{
     Name="ConvertBtn",
     Size=UDim2.new(0,70,0,20), Position=UDim2.new(1,-260,0,3),
     BackgroundColor3=Color3.fromRGB(50,40,70), BorderSizePixel=0,
-    Text="Conv GUI", TextColor3=Color3.fromRGB(200,160,255),
-    Font=Enum.Font.SourceSansBold, TextSize=9
+    Text="GUI -> SCRIPT", TextColor3=Color3.fromRGB(200,160,255),
+    Font=Enum.Font.SourceSansBold, TextSize=11
 }, decompHeader)
 local tabBar = mk("Frame",{
     Name="TabBar", Size=UDim2.new(1,0,0,22), Position=UDim2.new(0,0,0,26),
@@ -2849,7 +2850,7 @@ local viewerPane = mk("Frame",{
 local codeScroll = mk("ScrollingFrame",{
     Name="CodeScroll", Size=UDim2.new(1,0,1,0),
     BackgroundColor3=Color3.fromRGB(22,22,22), BorderSizePixel=0,
-    ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(70,70,70),
+    ScrollBarThickness=5, ScrollBarImageColor3=Color3.fromRGB(70,70,70),
     CanvasSize=UDim2.new(0,0,0,0), AutomaticCanvasSize=Enum.AutomaticSize.Y,
     HorizontalScrollBarInset=Enum.ScrollBarInset.None,
 }, viewerPane)
@@ -2889,7 +2890,7 @@ local editorScroll = mk("ScrollingFrame",{
     Name="EditorScroll",
     Size=UDim2.new(1,-gutterW,1,0), Position=UDim2.new(0,gutterW,0,0),
     BackgroundTransparency=1, BorderSizePixel=0,
-    ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(70,70,70),
+    ScrollBarThickness=5, ScrollBarImageColor3=Color3.fromRGB(70,70,70),
     CanvasSize=UDim2.new(0,0,0,0), AutomaticCanvasSize=Enum.AutomaticSize.Y,
     ScrollingDirection=Enum.ScrollingDirection.Y
 }, editorPane)
@@ -3030,7 +3031,7 @@ local inspScroll = mk("ScrollingFrame",{
     Name="InspScroll",
     Size=UDim2.new(1,0,1,-94), Position=UDim2.new(0,0,0,94),
     BackgroundTransparency=1, BorderSizePixel=0,
-    ScrollBarThickness=3, ScrollBarImageColor3=Color3.fromRGB(70,70,70),
+    ScrollBarThickness=5, ScrollBarImageColor3=Color3.fromRGB(70,70,70),
     CanvasSize=UDim2.new(0,0,0,0), AutomaticCanvasSize=Enum.AutomaticSize.Y,
     ClipsDescendants=true,
 }, inspectorPane)
@@ -3584,7 +3585,7 @@ local function setCodeText(raw)
         lbl.TextXAlignment      = Enum.TextXAlignment.Left
         lbl.TextYAlignment      = Enum.TextYAlignment.Top
         lbl.Font                = Enum.Font.Code
-        lbl.TextSize            = 10
+        lbl.TextSize            = 13
         lbl.RichText            = true
         lbl.TextWrapped         = true
         lbl.LayoutOrder         = order
@@ -3646,7 +3647,7 @@ local function openCtxMenu(inst, screenPos)
             end
         end)
         if inst.ClassName == "ModuleScript" then
-            addItem("☠", "zukv2 update",     Color3.fromRGB(255,160,60), function()
+            addItem("☠", "Poison!",     Color3.fromRGB(255,160,60), function()
                 local path = buildPath(inst)
                 local success, result = pcall(require, inst)
 
@@ -3658,6 +3659,9 @@ local function openCtxMenu(inst, screenPos)
                     elseif n == "FireRate" or n == "BurstRate" or n == "ReloadTime" or n == "EquipTime" then return 0
                     elseif n == "TacticalReloadTime" or n == "SwitchTime" or lowerN:find("delay") then return 0
                     elseif n == "AmmoPerMag" then return 999999
+                    elseif n =="Debuff" then return true
+                    elseif n =="DebuffChance" then return 100
+
                     elseif n == "Recoil" then return 0
                     elseif n == "BulletPerShot" then return 5
                     elseif n == "FriendlyFire" then return true
@@ -3732,7 +3736,7 @@ local function openCtxMenu(inst, screenPos)
                 pcall(setclipboard, output)
             end)
         end
-        addItem("⊞", "Inspect Module",  Color3.fromRGB(132,214,247), function()
+        addItem("!", "Inspect Module",  Color3.fromRGB(132,214,247), function()
             selected = inst
             setPanelExpanded(true)
             setTab("inspector")
@@ -3958,7 +3962,7 @@ local function openCtxMenu(inst, screenPos)
         Size=UDim2.new(0,182,0,totalH+2),
         Position=UDim2.fromOffset(menuX, menuY),
         BackgroundColor3=Color3.fromRGB(36,36,36),
-        BorderSizePixel=0, ZIndex=60,
+        BorderSizePixel=4, ZIndex=60,
         ClipsDescendants=true,
     }, sg)
     mk("UICorner",{CornerRadius=UDim.new(0,5)}, menu)
@@ -4168,9 +4172,9 @@ decompBtn.MouseButton1Click:Connect(function()
             ..tostring(selected.ClassName)..'.\n-- Pick a Script, LocalScript or ModuleScript.</font>'
         return
     end
-    decompBtn.Text = "Working…"
+    decompBtn.Text = "View"
     decompBtn.BackgroundColor3 = Color3.fromRGB(80,60,20)
-    codeLabel.Text = '<font color="#555555">-- Decompiling '..selected.Name..'…</font>'
+    codeLabel.Text = '<font color="#494949ff">-- Decompiling '..selected.Name..'…</font>'
     task.defer(function()
         local raw = runDecompile(selected)
         lastDecompResult = raw
@@ -4343,7 +4347,7 @@ convertBtn.MouseButton1Click:Connect(function()
         codeLabel.Text = '<font color="#ff9030">-- "'..tostring(selected.Name)..'" is not a ScreenGui.\n-- Select a ScreenGui to use Convert GUI.</font>'
         return
     end
-    convertBtn.Text = "Working…"
+    convertBtn.Text = "View"
     convertBtn.BackgroundColor3 = Color3.fromRGB(60,40,80)
     codeLabel.Text = '<font color="#555555">-- Converting '..selected.Name..'…</font>'
     task.defer(function()
@@ -4351,7 +4355,7 @@ convertBtn.MouseButton1Click:Connect(function()
         lastDecompResult = output
         setCodeText(output)
         decompTitle.Text = "ScreenGui › " .. selected.Name .. "  [Converted]"
-        convertBtn.Text = "Conv GUI"
+        convertBtn.Text = "GUI -> SCRIPT"
         convertBtn.BackgroundColor3 = Color3.fromRGB(50,40,70)
         setPanelExpanded(true)
     end)
@@ -4381,7 +4385,7 @@ local function serializeValShort(v)
 end
 local function getTypeColor(v)
     local t = typeof(v)
-    if t == "string"   then return Color3.fromRGB(173,241,149)
+    if t ==     "string"   then return Color3.fromRGB(173,241,149)
     elseif t == "number" then return Color3.fromRGB(255,198,0)
     elseif t == "boolean" then return Color3.fromRGB(255,198,0)
     elseif t == "Color3" then return v
@@ -4736,7 +4740,7 @@ setPanelExpanded = function(expand)
         TweenService:Create(rightCol, TWEEN_INFO, {
             Position = UDim2.new(1, -(PANEL_W + DECOMP_W), 0, 0),
         }):Play()
-        toggleBtn.Text = "<"
+        toggleBtn.Text = ">"
     else
         local tw = TweenService:Create(rightCol, TWEEN_INFO, {
             Position = UDim2.new(1, 0, 0, 0),
@@ -4747,7 +4751,7 @@ setPanelExpanded = function(expand)
                 rightCol.Visible = false
             end
         end)
-        toggleBtn.Text = ">"
+        toggleBtn.Text = "<"
     end
 end
 toggleBtn.MouseButton1Click:Connect(function()
