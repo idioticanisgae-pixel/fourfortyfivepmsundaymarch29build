@@ -2162,6 +2162,8 @@ local function buildIconTable()
     end
     local ICON_DIR = "zukv2_icons/"
     pcall(makefolder, ICON_DIR)
+
+	                                                -- Base64 Encoded icons because nobody else has done it from what I know of.
     local b64 = {
         ["Workspace"] = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABdUlEQVR4nKWSTU7CQBTH32uA+EEiR4CFlB14AuEGcIOSULfWE4gngKWRJtQb4A28gWVhUuoCjoCJceGi43/G6dDa+BV/yWTevL7363SmTP+kIOisvdrr28s5C+oKpg5SNYyQmYP98uFt2JhusTbkBK3YdRIhJgjvLIuCvVI1lA3N1UggJ0GzNYztmwVihRE0V2d9oiQoM3cfm7MQKUNGoIC8Fx379wSUQG97jeZesdmdEwmH8mwPKtWG3J0S4A1jIqrHtu9Qhi+aFTiji1XLn6aCB6TC2J4NsZRrgeknUO+fMIJMAwdSslt/DwT8SSD5kCAw2NHIw5VOEObICFwcnGgj1PxGwkvUdBgRBKMxEV1iGKQdUw7UCUwpV6gZqyJ9jRsiOsLQFHeRETzjGuvmGiX6L5wjNOAN5rlkJ7AG6d+YK9CSKUK1k1TQenJPk4QcnNPAYvai5iwgjSrIoj/Hw6M+GtpIAV4iXliVUhA1rjeUoSD4K+9YpagRYU5wDwAAAABJRU5ErkJggg==",
         ["Players"] = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAu0lEQVR4nN2QsQ3CMBBF75iDHWAHTOfQMwFTIILo6VmDuMPsADuwBhz/TGw5LrGUIk+K/pdyfs6FqZKBwN6lYSGLSsLk3Io7VLI3aTF5QMULOro1t9QzEDReLohEZ3iHIOtFEAlnOJ1LRakWVK/wD0GQ3xzhGZ0/b9pi4ndzSf8lQVDuruj+5e4l+i+mIojkIhUgAqVIDyICqSi5QImS8QQbL3tMzlH1xetq+ISqggdigUd5QrBEBjBXxxdyKncRwlInYwAAAABJRU5ErkJggg==",
