@@ -1,517 +1,448 @@
+-- Client.luau
+
 return (function(...)
-local IlllIl11I1l1l1lll11111;
+local cx861;
 do
-	local l1lIl1lll1l1I111IlI = math.floor;
-	local I11IIllIl11lIIII1llIl1 = string.byte;
-	local I11II1IIIlI1I111llI11 = string.char;
-	local lII1lI1ll1I1IIIIIIII11 = table.concat;
-	local lIlllIII1l1I1II1I1III = 0x3B;
-	local l1l1II1llI1IllIl1IlI = 0x1000193;
-	local IIIIll1l1l1II1III11l11 = tick and tick() or os and (os.clock and os.clock()) or 0x0;
-	local Il1l1IIlllll1lI11llI1 = l1lIl1lll1l1I111IlI(IIIIll1l1l1II1III11l11 * 0x3E8) % 0xFFF1 + 0x1;
-	local function ll1lIIIIIlII1l1l1111I1(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1)
-		local l1111Il1I11II1I1l11111, ll11ll1I11lII1I1lll1I = 0x0, 0x1;
-		while IlIIl11l1lIIIl11l11ll1 > 0x0 or I111I1l111Il1IIIl1ll1 > 0x0 do
-			local I1Illl1IllIIl11II111 = IlIIl11l1lIIIl11l11ll1 % 0x2;
-			local lIlIIll1Illlll1lI1IIl1 = I111I1l111Il1IIIl1ll1 % 0x2;
-			if I1Illl1IllIIl11II111 ~= lIlIIll1Illlll1lI1IIl1 then
-				l1111Il1I11II1I1l11111 = l1111Il1I11II1I1l11111 + ll11ll1I11lII1I1lll1I;
+	local bp58E = math.floor;
+	local cx591 = string.byte;
+	local op5A3 = string.char;
+	local ax5B5 = table.concat;
+	local v5C7 = 0xE;
+	local bp5D9 = 0x1000193;
+	local cx5EB = tick and tick() or os and (os.clock and os.clock()) or 0x0;
+	local op5FD = bp58E(cx5EB * 0x3E8) % 0xFFF1 + 0x1;
+	local function ax600(cx591, op5A3)
+		local ax5B5, v5C7 = 0x0, 0x1;
+		while cx591 > 0x0 or op5A3 > 0x0 do
+			local bp5D9 = cx591 % 0x2;
+			local cx5EB = op5A3 % 0x2;
+			if bp5D9 ~= cx5EB then
+				ax5B5 = ax5B5 + v5C7;
 			end;
-			IlIIl11l1lIIIl11l11ll1 = l1lIl1lll1l1I111IlI(IlIIl11l1lIIIl11l11ll1 / 0x2);
-			I111I1l111Il1IIIl1ll1 = l1lIl1lll1l1I111IlI(I111I1l111Il1IIIl1ll1 / 0x2);
-			ll11ll1I11lII1I1lll1I = ll11ll1I11lII1I1lll1I * 0x2;
+			cx591 = bp58E(cx591 / 0x2);
+			op5A3 = bp58E(op5A3 / 0x2);
+			v5C7 = v5C7 * 0x2;
 		end;
-		return l1111Il1I11II1I1l11111;
+		return ax5B5;
 	end;
-	local function lI1I1IlI111IIl1ll1l1l1()
-		Il1l1IIlllll1lI11llI1 = (Il1l1IIlllll1lI11llI1 * 0xF4243 + 0x7) % 0xFFF1 + 0x1;
-		return Il1l1IIlllll1lI11llI1;
+	local function v612()
+		op5FD = (op5FD * 0xF4243 + 0x7) % 0xFFF1 + 0x1;
+		return op5FD;
 	end;
-	function IlllIl11I1l1l1lll11111(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1)
-		local l1111Il1I11II1I1l11111 = lI1I1IlI111IIl1ll1l1l1();
-		local ll11ll1I11lII1I1lll1I = (I111I1l111Il1IIIl1ll1 * l1l1II1llI1IllIl1IlI + l1111Il1I11II1I1l11111) % 0xFFF1;
-		local ll1I11llIl1l1lIIllI = #IlIIl11l1lIIIl11l11ll1;
-		local I1l1IlI11l1llII11II1l1 = {};
-		for I1Illl1IllIIl11II111 = 0x1, ll1I11llIl1l1lIIllI, 0x1 do
-			local lIlIIll1Illlll1lI1IIl1 = I11IIllIl11lIIII1llIl1(IlIIl11l1lIIIl11l11ll1, I1Illl1IllIIl11II111);
-			local l1ll11IlIIl111I1l11I1 = ll1lIIIIIlII1l1l1111I1(lIlllIII1l1I1II1I1III, (ll11ll1I11lII1I1lll1I * l1l1II1llI1IllIl1IlI + I1Illl1IllIIl11II111) % 0xFB);
-			I1l1IlI11l1llII11II1l1[I1Illl1IllIIl11II111] = I11II1IIIlI1I111llI11(ll1lIIIIIlII1l1l1111I1(lIlIIll1Illlll1lI1IIl1, l1ll11IlIIl111I1l11I1) % 0x100);
+	function cx861(bp58E, cx5EB)
+		local op5FD = v612();
+		local bp624 = (cx5EB * bp5D9 + op5FD) % 0xFFF1;
+		local cx636 = #bp58E;
+		local op648 = {};
+		for ax5B5 = 0x1, cx636, 0x1 do
+			local cx5EB = cx591(bp58E, ax5B5);
+			local op5FD = ax600(v5C7, (bp624 * bp5D9 + ax5B5) % 0xFB);
+			op648[ax5B5] = op5A3(ax600(cx5EB, op5FD) % 0x100);
 		end;
-		return lII1lI1ll1I1IIIIIIII11(I1l1IlI11l1llII11II1l1);
+		return ax5B5(op648);
 	end;
 end;
-local lIIlI1Il1l1IIlI1111ll1, l1I1l1IIl11lllI1l1ll1;
+local bp85E, imm84C;
 do
-	local l1lIl1lll1l1I111IlI = math.floor;
-	local I11IIllIl11lIIII1llIl1 = math.random;
-	local I11II1IIIlI1I111llI11 = table.remove;
-	local lII1lI1ll1I1IIIIIIII11 = string.char;
-	local lIlllIII1l1I1II1I1III = string.byte;
-	local l1l1II1llI1IllIl1IlI = string.len;
-	local IIIIll1l1l1II1III11l11 = 0x19660D;
-	local Il1l1IIlllll1lI11llI1 = 0xCCD1;
-	local ll1lIIIIIlII1l1l1111I1 = 4294967296;
-	local lI1I1IlI111IIl1ll1l1l1 = 0x3;
-	local function llIIll1I1Il1Il1l1lIl1(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1)
-		local l1111Il1I11II1I1l11111, ll11ll1I11lII1I1lll1I = 0x0, 0x1;
-		while IlIIl11l1lIIIl11l11ll1 > 0x0 or I111I1l111Il1IIIl1ll1 > 0x0 do
-			local I1Illl1IllIIl11II111 = IlIIl11l1lIIIl11l11ll1 % 0x2;
-			local lIlIIll1Illlll1lI1IIl1 = I111I1l111Il1IIIl1ll1 % 0x2;
-			if I1Illl1IllIIl11II111 ~= lIlIIll1Illlll1lI1IIl1 then
-				l1111Il1I11II1I1l11111 = l1111Il1I11II1I1l11111 + ll11ll1I11lII1I1lll1I;
+	local bp58E = math.floor;
+	local cx591 = math.random;
+	local op5A3 = table.remove;
+	local ax5B5 = string.char;
+	local v5C7 = string.byte;
+	local bp5D9 = string.len;
+	local cx5EB = 0x19660D;
+	local op5FD = 0x13677;
+	local ax600 = 4294967296;
+	local v612 = 0x12;
+	local function bp624(cx591, op5A3)
+		local ax5B5, v5C7 = 0x0, 0x1;
+		while cx591 > 0x0 or op5A3 > 0x0 do
+			local bp5D9 = cx591 % 0x2;
+			local cx5EB = op5A3 % 0x2;
+			if bp5D9 ~= cx5EB then
+				ax5B5 = ax5B5 + v5C7;
 			end;
-			IlIIl11l1lIIIl11l11ll1 = l1lIl1lll1l1I111IlI(IlIIl11l1lIIIl11l11ll1 / 0x2);
-			I111I1l111Il1IIIl1ll1 = l1lIl1lll1l1I111IlI(I111I1l111Il1IIIl1ll1 / 0x2);
-			ll11ll1I11lII1I1lll1I = ll11ll1I11lII1I1lll1I * 0x2;
+			cx591 = bp58E(cx591 / 0x2);
+			op5A3 = bp58E(op5A3 / 0x2);
+			v5C7 = v5C7 * 0x2;
 		end;
-		return l1111Il1I11II1I1l11111;
+		return ax5B5;
 	end;
-	local Il1I1ll1lIll111l1llI11, IlII1III111lll1lllI1I, Ill1l1Ill1l111I1ll11 = 0x0, 0x1, {};
-	local llllIIIl111lll1l1I1Il1 = {};
-	local l11Il1lIl111111I1IlI1 = {};
-	for IlIIl11l1lIIIl11l11ll1 = 0x1, 0x100, 0x1 do
-		l11Il1lIl111111I1IlI1[IlIIl11l1lIIIl11l11ll1] = IlIIl11l1lIIIl11l11ll1;
+	local cx636, op648, ax65A = 0x0, 0x1, {};
+	local imm66C = {};
+	local bp67E = {};
+	for bp58E = 0x1, 0x100, 0x1 do
+		bp67E[bp58E] = bp58E;
 	end;
 	repeat
-		local IlIIl11l1lIIIl11l11ll1 = I11IIllIl11lIIII1llIl1(0x1, #l11Il1lIl111111I1IlI1);
-		local I111I1l111Il1IIIl1ll1 = I11II1IIIlI1I111llI11(l11Il1lIl111111I1IlI1, IlIIl11l1lIIIl11l11ll1);
-		llllIIIl111lll1l1I1Il1[I111I1l111Il1IIIl1ll1] = lII1lI1ll1I1IIIIIIII11(I111I1l111Il1IIIl1ll1 - 0x1);
-	until #l11Il1lIl111111I1IlI1 == 0x0;
-	local function IlIl111lIl11llI1I11lI1()
-		Il1I1ll1lIll111l1llI11 = (Il1I1ll1lIll111l1llI11 * IIIIll1l1l1II1III11l11 + Il1l1IIlllll1lI11llI1) % ll1lIIIIIlII1l1l1111I1;
-		IlII1III111lll1lllI1I = (IlII1III111lll1lllI1I * 0x25 + 0x7) % 0xFB + 0x1;
-		return l1lIl1lll1l1I111IlI((Il1I1ll1lIll111l1llI11 + IlII1III111lll1lllI1I * 0x10001) % ll1lIIIIIlII1l1l1111I1);
+		local bp58E = cx591(0x1, #bp67E);
+		local v5C7 = op5A3(bp67E, bp58E);
+		imm66C[v5C7] = ax5B5(v5C7 - 0x1);
+	until #bp67E == 0x0;
+	local function cx681()
+		cx636 = (cx636 * cx5EB + op5FD) % ax600;
+		op648 = (op648 * 0x25 + 0x7) % 0xFB + 0x1;
+		return bp58E((cx636 + op648 * 0x10001) % ax600);
 	end;
-	local function IlIlI1I11lII111II1lll1()
-		if #Ill1l1Ill1l111I1ll11 == 0x0 then
-			local I1Illl1IllIIl11II111 = IlIl111lIl11llI1I11lI1();
-			Ill1l1Ill1l111I1ll11 = {
-					I1Illl1IllIIl11II111 % 0x100,
-					l1lIl1lll1l1I111IlI(I1Illl1IllIIl11II111 / 0x100) % 0x100,
-					l1lIl1lll1l1I111IlI(I1Illl1IllIIl11II111 / 0x10000) % 0x100,
-					l1lIl1lll1l1I111IlI(I1Illl1IllIIl11II111 / 0x1000000) % 0x100,
+	local function op693()
+		if #ax65A == 0x0 then
+			local cx591 = cx681();
+			ax65A = {
+					cx591 % 0x100,
+					bp58E(cx591 / 0x100) % 0x100,
+					bp58E(cx591 / 0x10000) % 0x100,
+					bp58E(cx591 / 0x1000000) % 0x100,
 				};
 		end;
-		return I11II1IIIlI1I111llI11(Ill1l1Ill1l111I1ll11);
+		return op5A3(ax65A);
 	end;
-	local IllIlI1IlllIlI1111II = {};
-	local function l1Il1l1llIl11I11Ill111(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1)
-		if not IllIlI1IlllIlI1111II[I111I1l111Il1IIIl1ll1] then
-			Ill1l1Ill1l111I1ll11 = {};
-			Il1I1ll1lIll111l1llI11 = I111I1l111Il1IIIl1ll1 % ll1lIIIIIlII1l1l1111I1;
-			IlII1III111lll1lllI1I = I111I1l111Il1IIIl1ll1 % 0xFB + 0x1;
-			local I1Illl1IllIIl11II111 = l1l1II1llI1IllIl1IlI(IlIIl11l1lIIIl11l11ll1);
-			local lIlIIll1Illlll1lI1IIl1 = lI1I1IlI111IIl1ll1l1l1;
-			local l1ll11IlIIl111I1l11I1 = {};
-			for lI111lIIII1I1IlIlIl1l1 = 0x1, I1Illl1IllIIl11II111, 0x1 do
-				local l1111111l1I11lII11Il1 = lIlllIII1l1I1II1I1III(IlIIl11l1lIIIl11l11ll1, lI111lIIII1I1IlIlIl1l1);
-				local IIlll1lI1I1I1I1lI1lI11 = IlIlI1I11lII111II1lll1();
-				local I1l1ll11lIlI1lIl1I1II = llIIll1I1Il1Il1l1lIl1(l1111111l1I11lII11Il1, llIIll1I1Il1Il1l1lIl1(IIlll1lI1I1I1I1lI1lI11, lIlIIll1Illlll1lI1IIl1)) % 0x100;
-				l1ll11IlIIl111I1l11I1[lI111lIIII1I1IlIlIl1l1] = llllIIIl111lll1l1I1Il1[I1l1ll11lIlI1lIl1I1II + 0x1];
-				lIlIIll1Illlll1lI1IIl1 = ((lIlIIll1Illlll1lI1IIl1 + I1l1ll11lIlI1lIl1I1II) + 0xD) % 0x100;
+	local ax6A5 = {};
+	local function imm6B7(bp58E, cx591)
+		if not ax6A5[cx591] then
+			ax65A = {};
+			cx636 = cx591 % ax600;
+			op648 = cx591 % 0xFB + 0x1;
+			local op5A3 = bp5D9(bp58E);
+			local ax5B5 = v612;
+			local cx5EB = {};
+			for cx591 = 0x1, op5A3, 0x1 do
+				local op5A3 = v5C7(bp58E, cx591);
+				local bp5D9 = op693();
+				local op5FD = bp624(op5A3, bp624(bp5D9, ax5B5)) % 0x100;
+				cx5EB[cx591] = imm66C[op5FD + 0x1];
+				ax5B5 = ((ax5B5 + op5FD) + 0xD) % 0x100;
 			end;
-			IllIlI1IlllIlI1111II[I111I1l111Il1IIIl1ll1] = table.concat(l1ll11IlIIl111I1l11I1);
+			ax6A5[cx591] = table.concat(cx5EB);
 		end;
-		return I111I1l111Il1IIIl1ll1;
+		return cx591;
 	end;
-	l1I1l1IIl11lllI1l1ll1 = setmetatable({}, { __index = function(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1)
-				return IllIlI1IlllIlI1111II[I111I1l111Il1IIIl1ll1];
+	bp85E = setmetatable({}, { __index = function(bp58E, cx591)
+				return ax6A5[cx591];
 			end, __metatable = nil });
-	function lIIlI1Il1l1IIlI1111ll1(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1)
-		return l1Il1l1llIl11I11Ill111(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1);
+	function imm84C(bp58E, cx591)
+		return imm6B7(bp58E, cx591);
 	end;
 end;
-if (getgenv())[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("WC\207\246\007\204U\134\222t\r\255\195H\131", -1830869570)]] then
+if (getgenv())[bp85E[imm84C("=\138\228\027\230E|\1389\197\150~\143\196\181", -73271485)]] then
 	return;
 end;
-(getgenv())[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("8\007m\2234\251z\145\251\163\197\180\230\n\242", -576210097)]] = true;
-local lIIIlIIlI1llll1llIIII = newcclosure or function(l1lIl1lll1l1I111IlI)
-		return l1lIl1lll1l1I111IlI;
+(getgenv())[bp85E[imm84C("\005@\150\240\\.\025\155g\026x\011\011b\169", -1479848042)]] = true;
+local bp58E = newcclosure or function(bp58E)
+		return bp58E;
 	end;
-local ll11111I1I111I1lll1I = checkcaller or function()
+local cx591 = checkcaller or function()
 		return false;
 	end;
-local IlIIllIl1I1lll11I11l11 = getrawmetatable;
-local IIII1l1Il1111llIIlllI = setreadonly or function()
+local op5A3 = getrawmetatable;
+local ax5B5 = setreadonly or function()
  
 	end;
-local lII1I1ll1Il1ll1II111I1 = hookfunction or function()
+local v5C7 = hookfunction or function()
  
 	end;
-local lIIlI1I1IlII11lllIl1l1 = getgc or get_gc_objects or function()
+local bp5D9 = getgc or get_gc_objects or function()
 		return {};
 	end;
-local l1IIlI1l1llIl1I11Il11 = getscriptidentity or getidentity or get_thread_identity or nil;
-local I11Il11ll1IIlIlIIllI11 = setscriptidentity or setidentity or set_thread_identity or nil;
+local cx5EB = getscriptidentity or getidentity or get_thread_identity or nil;
+local op5FD = setscriptidentity or setidentity or set_thread_identity or nil;
 if not game:IsLoaded() then
-	game[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("L\146\164\1596\184", -1737019154)]]:Wait();
+	game[bp85E[imm84C("\205r\225\170m9", -1599585968)]]:Wait();
 end;
-local IlI1III1ll1IIllll1I1I = game:GetService(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\156\236\170\143\025\202\168", -1625473478)]);
+local ax600 = game:GetService(bp85E[imm84C("\206\136\253\151\181\r\203", -149885407)]);
 repeat
-	task[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\000[G>", -1942218632)]](.1);
-until IlI1III1ll1IIllll1I1I and IlI1III1ll1IIllll1I1I[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("5\134S\\7~\'\174|x\161", -1900208774)]];
-local Illl1I1IIl1IIIlI1l11 = IlI1III1ll1IIllll1I1I[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("m\246\167\"od\172\161Q\\\020", -2106850088)]];
-local llII1I11II1Il111lIlIl1 = false;
-local llllIIIIIlIII1lll1Il1 = nil;
-local Il1IIllI1lll111II11lI1 = {};
-local Ill11l1ll1lllIl1Illl11 = {
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\007\231\132\165\202\022\147]\252\136\019\141", -346171717)]] = 0x0,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\212Z\247\009\139\024\165\129\rwlz\223\142", -2082666566)]] = 0x0,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\009!\011\202&N6 g\230\180\023-\161\181Y", -1569110798)]] = 0x0,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\156\130%\202\024\181o\139J\250\005`\003>\156", -1474342850)]] = 0x0,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1(",\197}\253<\002\030\145|\017\249Z\1962\178\137Y\254>", -447886693)]] = 0x0,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\228\205g\009\161~\189z,\234\2395", -1413982352)]] = 0x0,
+	task[bp85E[imm84C("\174^\225\139", -978482341)]](.1);
+until ax600 and ax600[bp85E[imm84C("\011\162W\186\248\189[*6\229Z", -437400613)]];
+local v612 = ax600[bp85E[imm84C("a1\004\216\191\134W?\242\249d", -1673971598)]];
+local bp624 = false;
+local cx636 = nil;
+local op648 = {};
+local ax65A = {
+		[bp85E[imm84C("\176\207\160\197\222\149\016w(\023\169O", -1035893629)]] = 0x0,
+		[bp85E[imm84C("u\241\160E\230\186\004\203i\009\132\027\211\170", -1959324050)]] = 0x0,
+		[bp85E[imm84C("\221|l\216\210\151g\217\222|\016\021\"\214\149\019", -38143117)]] = 0x0,
+		[bp85E[imm84C("\167m\166\207\023)7D\"P\130\018\152\166\146", -2108357462)]] = 0x0,
+		[bp85E[imm84C("x\029Y\152\130\016\022\222\209\177s\240u\215\132\173@\218\224", -751983013)]] = 0x0,
+		[bp85E[imm84C("\025\146\"7\171\235G\160\165\132s\135", -1418635550)]] = 0x0,
 	};
-local function I1IIllIIIIII11llIIII(l1lIl1lll1l1I111IlI)
+local function imm66C(bp58E)
 	if rconsoleprint then
-		pcall(rconsoleprint, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\158\128\222\226)\235\220\137\219\203\152", -442250425)] .. (tostring(l1lIl1lll1l1I111IlI) .. l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\157", -1154582948)]));
+		pcall(rconsoleprint, bp85E[imm84C("\140\001\195\005\246\202\172\157\198\183\219", -842294377)] .. (tostring(bp58E) .. bp85E[imm84C("\173", -2103966416)]));
 	end;
 end;
-local l1l11lII11lllllII1l111 = {
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\006\205\227F[\156\179\136\160\182\143", -264445831)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("*\144\190(\194J9\\}\":", -1320000860)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\r\229j", -1990126910)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\174:k\016\145\242", -1156352474)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("M\003R7", -1796068892)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\133\218\179\183M\180", -1530771068)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("7\128\009\141wk\\\251", -1642447820)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("Q\210\180[\154\171\164\150\2446\252{\141\128", -192288493)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\174\137\255#\191\249\150\218\143\231\239\1492e\137\216", -1284806954)]] = true,
+local bp67E = {
+		[bp85E[imm84C("\247\152\2070\188\014\137\242\251m?", -122490523)]] = true,
+		[bp85E[imm84C("\245O#~\250@\0076\190\185w", -524959381)]] = true,
+		[bp85E[imm84C("s\245\018", -230038381)]] = true,
+		[bp85E[imm84C("\165R\214z\021\224", -1492890104)]] = true,
+		[bp85E[imm84C("\172lv\135", -1183091978)]] = true,
+		[bp85E[imm84C("\128\200\219\1412\188", -386936353)]] = true,
+		[bp85E[imm84C("\012\142\019\205\023$\158;", -73599175)]] = true,
+		[bp85E[imm84C("z\204\189PI\208%\128\240d\155sL\018", -1613938790)]] = true,
+		[bp85E[imm84C("\182D\190\218T\009cDz\020`\179v\131B\016", -1600175810)]] = true,
 	};
-local lI1I1IllIl11lI1l11IlI = { [l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\176\011{?2\225\004\007", -746281207)]] = true, [l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("o\171i\132\150\000\026\201\nC\188\145", -1290836450)]] = true };
-local lIIIIII1II11lIlI111 = {
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("[u1\214", -1833163400)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\\\205c\1992:\241\169Z\255", -11141461)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\181\221>\141\187\219\206\227\1623`\243", -1023572485)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\002\171\233`\235]\194\ni\153\198", -1766183564)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\011\198t\015\136}S\n:f\227sY\191", -835478425)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\130\194\248\218rk\178%\154\139\145\149\195\174", -1555413356)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("*\nH>1\177\225\127<\235\214\189\218\186\027\197k\222w\213r", -1227788894)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\229\169\214\248\024B\128t\n\140\155\029\155s\211\190\130\170\\\170B\175", -203036725)]] = true,
+local cx681 = { [bp85E[imm84C("\025\188\006\025\199=\232+", -1882513514)]] = true, [bp85E[imm84C("{\019\203\008\228+4\008\150g\000|", -1114147)]] = true };
+local op693 = {
+		[bp85E[imm84C("r\144\027\017", -18678331)]] = true,
+		[bp85E[imm84C("a\146\145\248\027\217@\139\136\028", -1157925386)]] = true,
+		[bp85E[imm84C("\246E\174\139\172JI\230]\026{\012", -1499312828)]] = true,
+		[bp85E[imm84C("\005\139e\213\142{\255\252xs\235", -479738161)]] = true,
+		[bp85E[imm84C("\015jq\151_\212U\157\233\138Xo\212\155", -817914241)]] = true,
+		[bp85E[imm84C("\224\168\172L^HBK\167e\236\2372;", -2125462880)]] = true,
+		[bp85E[imm84C("\002\133\211\147\203:\"G\154S\251\133\162\194\185f\206\235\235a\250", -1239126968)]] = true,
+		[bp85E[imm84C("\002\192#\216\024x\251\201\200\017\"}\014\015\001%L4\223\016\183\155", -215554483)]] = true,
 	};
-local Il1Il1II1IllII1Il1I1l1 = {
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\236\252Y\004\158=C", -2055402758)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\154\"\187z\167\149\223\214V\252\233\161f\223=", -1496494694)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("a\1603\168", -286794289)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\005\003\211\241", -947220715)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\161\019E\208\0204\\=\172U", -878864581)]] = true,
+local ax6A5 = {
+		[bp85E[imm84C("\250,]\223\179\229\159", -1275828248)]] = true,
+		[bp85E[imm84C("Q\198\171\203\250\179t\227\244}\135\151\006\210:", -1424271818)]] = true,
+		[bp85E[imm84C("\172mH\163", -171644023)]] = true,
+		[bp85E[imm84C("rtpO", -1358930432)]] = true,
+		[bp85E[imm84C("\160\164\023\201\022\251\016$\183t", -84675097)]] = true,
 	};
-local IIl1IlIIl111l1lll1111 = {
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("h\003x\179\245\236\184\008\237\204\"", -217717237)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("O\171\237 \1372+\217\243\159\009\194})", -1992813968)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\014}\137\226\130\130\182\151\247\208S\193", -345188647)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\226\227\n\002\241l\026\253\220\r[\138\2142\\", -1204457366)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\202\141\018Xe\177+pPT", -1841617802)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\211<\021\191\186z\223\146fn", -1285855562)]] = true,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\248f\228=\207\210sY\218", -1317510416)]] = true,
+local imm6B7 = {
+		[bp85E[imm84C("\219q\146\132\218xT\201\181\175\194", -1506390932)]] = true,
+		[bp85E[imm84C("\241v\209\200\230\195]\138N\170\246L\230@", -723015217)]] = true,
+		[bp85E[imm84C("\217\001\210^9tv\007\030I\002k", -570770443)]] = true,
+		[bp85E[imm84C("\182\245k\014\018\205z\149|h\002L\229u\212", -811753669)]] = true,
+		[bp85E[imm84C("\159\170\164[\000\151E\197h7", -1355719070)]] = true,
+		[bp85E[imm84C("\131\015\1974=\144\245\231\138\229", -1580514410)]] = true,
+		[bp85E[imm84C("z\184X\147G\197R\161\135", -913927411)]] = true,
 	};
-local llllIlII1llIlII1llII11 = {
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("v\176Sg\219\026\160:\198", -2055992600)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\244:\023[\003\199\240N\173L", -2045572058)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\'Kj\020\142y\196\241\002s", -1747964000)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("q\142\1821I\127\217\016\244", -874735687)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\147\128\249)\193\229\025\187\129/\233\002z", -943681663)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("=\215c\021\191RfJ\194\154|\249", -796090087)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\173|\169F1\253#\020\249\241", -1290901988)],
+local bp6C9 = {
+		bp85E[imm84C("\213~o\029l\028si_", -116723179)],
+		bp85E[imm84C("gw_\144y\177]a\246\246", -965636893)],
+		bp85E[imm84C(" w\226\016\192~\252&\229\008", -1707592592)],
+		bp85E[imm84C("$\192\192\188C\231CBZ", -1149208832)],
+		bp85E[imm84C("X)0m\148\191tP\213\n\005V\146", -803495881)],
+		bp85E[imm84C("\147\012\2281NV\001\200\248v\2500", -33162229)],
+		bp85E[imm84C("\203\241I\015\250\236>\1381\202", -236330029)],
 	};
-local llll11lI1IIl1l1l1l1II = {
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\218@!\247\236\026", -35324983)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\167\231t\232", -886925755)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("B\170\231W\207", -1950804110)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\2330q\186^\157\147", -61933411)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\157\233]\211", -778591441)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\207\029\253j\239\255B\001", -495598357)],
-		l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\015\001\148", -1405331336)],
+local cx6DB = {
+		bp85E[imm84C("MS\152T\238=", -1696123442)],
+		bp85E[imm84C("Mp\"\181", -650071423)],
+		bp85E[imm84C("\019\212R4\199", -599017321)],
+		bp85E[imm84C("eI\184\134\201\176\183", -1699269266)],
+		bp85E[imm84C("\248\148d\007", -1017411913)],
+		bp85E[imm84C("_a\1971\206\224WN", -1375183856)],
+		bp85E[imm84C("V\229\243", -817455475)],
 	};
-local lIl1Il1I111I1IlllllI = { [l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\163\251\143\135\211\220\142Y\196H\136", -1911284696)]] = true, [l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\180\212\181UU\158\141$K\240", -837510103)]] = true };
-local Il11l11lI1IIl1I1lIll11 = {
-		{ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("p\185\203\1678\154\016\023", -1269995366)], true, 0x1 },
-		{ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("&44\014\149+d\198CU\226\232", -897149683)], true, 0x1 },
-		{ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1(":\156\'w\127\133l!\168\217\184\246)nC", -1165921022)], true, 0x1 },
-		{ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\214\015\1713\218@\129g&bq]}", -357771943)], false, 0x1 },
-		{ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("3\187\029\003uO^_\182\196\198\1357\142\156", -777542833)], false, 0x1 },
-		{ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("Q,\171#\229\178l\167\174\194V\192\202\230pboO", -1898963552)], false, 0x1 },
-		{ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("g\165\141\015\148\221\217\133\2501\127\192\196\254", -1218810188)], true, .5 },
-		{ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("k\201x\026\2354\141\145\205\239\028\0236\235", -1161857666)], true, .5 },
-		{ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\174\238\189\221\236\128\011\246\215i3\188\148\190\031\024", -1571470166)], false, 0x1 },
-		{ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("^\142HR\144\1803}\212", -1680394322)], true, .5 },
+local op6ED = { [bp85E[imm84C("DWU\165\182\"\179Z\165\162P", -628443883)]] = true, [bp85E[imm84C("\253b\211+\245\184\182^\253`", -212212045)]] = true };
+local ax6F0 = {
+		{ bp85E[imm84C("\212R0\164Y@\236\203", -1569897254)], true, 0x1 },
+		{ bp85E[imm84C("\193D\249\239\201q\239\186{\006\150N", -323167879)], true, 0x1 },
+		{ bp85E[imm84C("\n?0\240x\160\167q\207}\127\228g\129{", -83954179)], true, 0x1 },
+		{ bp85E[imm84C("\251\130\011\222\150\164\135\221\163u\134\134\187", -315106705)], false, 0x1 },
+		{ bp85E[imm84C("\207\210\189.\147\1994R1\150\152\246\244\159X", -774069319)], false, 0x1 },
+		{ bp85E[imm84C("\160\156\026]P\242\158\1790\228S\1616\156F%\156\164", -82708957)], false, 0x1 },
+		{ bp85E[imm84C("\136\220\026\148\1296sT\218\011\195\'\020\189", -1630061138)], true, .5 },
+		{ bp85E[imm84C("7|8\135c\201\021\134\245u\203\\5\222", -1495249472)], true, .5 },
+		{ bp85E[imm84C(",\207\156O\149\186\241@d\234\163\008z\003\252M", -2147155958)], false, 0x1 },
+		{ bp85E[imm84C("\145}dw\221qynY", -18416179)], true, .5 },
 	};
-local IIlIl11Il1lIIll1III1l = 0x3;
-local ll1111llIlIIl1llI1l1I1 = 0x2;
-local function lIlII1II1l1lII11I1Ill1(l1lIl1lll1l1I111IlI, ...)
-	local I11IIllIl11lIIII1llIl1, I11II1IIIlI1I111llI11 = pcall(l1lIl1lll1l1I111IlI, ...);
-	if I11IIllIl11lIIII1llIl1 then
-		return I11II1IIIlI1I111llI11;
+local imm702 = 0x3;
+local bp714 = 0x2;
+local function cx726(bp58E, ...)
+	local cx591, op5A3 = pcall(bp58E, ...);
+	if cx591 then
+		return op5A3;
 	end;
 end;
-local function l1lll111111I11ll111l1(l1lIl1lll1l1I111IlI, I11IIllIl11lIIII1llIl1)
-	local I11II1IIIlI1I111llI11 = IlIIllIl1I1lll11I11l11(l1lIl1lll1l1I111IlI);
-	if not I11II1IIIlI1I111llI11 then
+local function op738(bp58E, cx591)
+	local v5C7 = op5A3(bp58E);
+	if not v5C7 then
 		return false;
 	end;
-	local lII1lI1ll1I1IIIIIIII11 = pcall(function()
-			IIII1l1Il1111llIIlllI(I11II1IIIlI1I111llI11, false);
-			I11IIllIl11lIIII1llIl1(I11II1IIIlI1I111llI11);
-			IIII1l1Il1111llIIlllI(I11II1IIIlI1I111llI11, true);
+	local bp5D9 = pcall(function()
+			ax5B5(v5C7, false);
+			cx591(v5C7);
+			ax5B5(v5C7, true);
 		end);
-	if not lII1lI1ll1I1IIIIIIII11 then
-		pcall(IIII1l1Il1111llIIlllI, I11II1IIIlI1I111llI11, true);
+	if not bp5D9 then
+		pcall(ax5B5, v5C7, true);
 	end;
-	return lII1lI1ll1I1IIIIIIII11;
+	return bp5D9;
 end;
-local function IIlI11lIIIIII11l1Il111(l1lIl1lll1l1I111IlI, I11IIllIl11lIIII1llIl1)
-	if type(l1lIl1lll1l1I111IlI) ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\245\222\249o\238\157\145\221", -841507921)] then
+local function sp74A(cx591, op5A3)
+	if type(cx591) ~= bp85E[imm84C("\152g\004\165]^O1", -1993993652)] then
 		return false;
 	end;
-	local I11II1IIIlI1I111llI11 = pcall(lII1I1ll1Il1ll1II111I1, l1lIl1lll1l1I111IlI, lIIIlIIlI1llll1llIIII(I11IIllIl11lIIII1llIl1));
-	if not I11II1IIIlI1I111llI11 then
+	local ax5B5 = pcall(v5C7, cx591, bp58E(op5A3));
+	if not ax5B5 then
 		return false;
 	end;
-	table[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\215E\0170\235\226", -1906893650)]](Il1IIllI1lll111II11lI1, l1lIl1lll1l1I111IlI);
-	Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\019\239\155t\170\154\251\249I\0250z\246\137\020", -215554483)]] += 0x1;
+	table[bp85E[imm84C("\022\247\215\226\228\149", -1538242400)]](op648, cx591);
+	ax65A[bp85E[imm84C("\159\243\140\158\"\220\181\169|\252\127\204\007\158\212", -110628145)]] += 0x1;
 	return true;
 end;
-local function Ill111111I1II111Il11I(l1lIl1lll1l1I111IlI)
-	for IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1 in ipairs(Il1IIllI1lll111II11lI1) do
-		if l1lIl1lll1l1I111IlI == I111I1l111Il1IIIl1ll1 then
+local function imm75C(bp58E)
+	for cx591, op5A3 in ipairs(op648) do
+		if bp58E == op5A3 then
 			return true;
 		end;
 	end;
 	return false;
 end;
-local function III1lIlIlllll1Il1ll1(l1lIl1lll1l1I111IlI)
-	if type(l1lIl1lll1l1I111IlI) ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\127\016Z\189\143", -1806096206)] then
+local function bp76E(bp58E)
+	if type(bp58E) ~= bp85E[imm84C("\011\13819\026", -915369247)] then
 		return;
 	end;
 	pcall(function()
-		IIII1l1Il1111llIIlllI(l1lIl1lll1l1I111IlI, false);
-		local IlIIl11l1lIIIl11l11ll1 = IlIIllIl1I1lll11I11l11(l1lIl1lll1l1I111IlI);
-		if IlIIl11l1lIIIl11l11ll1 then
-			pcall(IIII1l1Il1111llIIlllI, IlIIl11l1lIIIl11l11ll1, false);
+		ax5B5(bp58E, false);
+		local cx591 = op5A3(bp58E);
+		if cx591 then
+			pcall(ax5B5, cx591, false);
 		end;
 	end);
 end;
-for l1lIl1lll1l1I111IlI, I11IIllIl11lIIII1llIl1 in ipairs({ getgenv, getrenv, getreg }) do
-	if type(I11IIllIl11lIIII1llIl1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("D\232l5\148\165\155F", -1171557290)] then
-		local IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1 = pcall(I11IIllIl11lIIII1llIl1);
-		if IlIIl11l1lIIIl11l11ll1 and type(I111I1l111Il1IIIl1ll1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\143\019\200\232g", -2088499448)] then
-			III1lIlIlllll1Il1ll1(I111I1l111Il1IIIl1ll1);
+for bp58E, cx591 in ipairs({ getgenv, getrenv, getreg }) do
+	if type(cx591) == bp85E[imm84C("\144$\003\028\166\149pN", -499661713)] then
+		local bp58E, op5A3 = pcall(cx591);
+		if bp58E and type(op5A3) == bp85E[imm84C("6\204\157\',", -657608293)] then
+			bp76E(op5A3);
 		end;
 	end;
 end;
-local function lI11I1111ll1lI11ll1Il1(l1lIl1lll1l1I111IlI)
-	if type(l1lIl1lll1l1I111IlI) ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\139\180m \162", -1311218768)] then
+local function cx771(bp58E)
+	if type(bp58E) ~= bp85E[imm84C("/\202]Q\159", -543572173)] then
 		return 0x0;
 	end;
-	local I11IIllIl11lIIII1llIl1 = 0x0;
+	local cx591 = 0x0;
 	pcall(function()
-		for I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1 in ipairs(Il11l11lI1IIl1I1lIll11) do
-			local l1ll11IlIIl111I1l11I1, II111lI11111ll1I1lIlI1, IIIllI11llI1l1IlIl1ll1 = lIlIIll1Illlll1lI1IIl1[0x1], lIlIIll1Illlll1lI1IIl1[0x2], lIlIIll1Illlll1lI1IIl1[0x3];
-			local IIIlIlIll1lIl1Illlll1 = rawget(l1lIl1lll1l1I111IlI, l1ll11IlIIl111I1l11I1);
-			if IIIlIlIll1lIl1Illlll1 ~= nil then
-				if II111lI11111ll1I1lIlI1 then
-					if type(IIIlIlIll1lIl1Illlll1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\153p\021\194\'t\129\000", -1756221788)] then
-						I11IIllIl11lIIII1llIl1 += IIIllI11llI1l1IlIl1ll1;
+		for op5A3, ax5B5 in ipairs(ax6F0) do
+			local v5C7, bp5D9, cx5EB = ax5B5[0x1], ax5B5[0x2], ax5B5[0x3];
+			local op5FD = rawget(bp58E, v5C7);
+			if op5FD ~= nil then
+				if bp5D9 then
+					if type(op5FD) == bp85E[imm84C("\156\133\243\2261\133\198\019", -1013414095)] then
+						cx591 += cx5EB;
 					end;
 				else
-					I11IIllIl11lIIII1llIl1 += IIIllI11llI1l1IlIl1ll1;
+					cx591 += cx5EB;
 				end;
 			end;
 		end;
 	end);
-	return I11IIllIl11lIIII1llIl1;
+	return cx591;
 end;
-local function lIIIIIl1Il11l1IlIII11()
-	local l1lIl1lll1l1I111IlI;
-	local I11IIllIl11lIIII1llIl1 = pcall(function()
-			l1lIl1lll1l1I111IlI = lIIlI1I1IlII11lllIl1l1(true);
+local function op783()
+	local bp58E;
+	local cx591 = pcall(function()
+			bp58E = bp5D9(true);
 		end);
-	if not I11IIllIl11lIIII1llIl1 or not l1lIl1lll1l1I111IlI then
+	if not cx591 or not bp58E then
 		return nil;
 	end;
-	for IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1 in ipairs(l1lIl1lll1l1I111IlI) do
-		local l1111Il1I11II1I1l11111, ll11ll1I11lII1I1lll1I = pcall(function()
-				return type(I111I1l111Il1IIIl1ll1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\175\143\131=\201", -1495839314)];
+	for bp58E, cx591 in ipairs(bp58E) do
+		local op5A3, ax5B5 = pcall(function()
+				return type(cx591) == bp85E[imm84C("\228\175\220\153\191", -968848255)];
 			end);
-		if l1111Il1I11II1I1l11111 and (ll11ll1I11lII1I1lll1I and lI11I1111ll1lI11ll1Il1(I111I1l111Il1IIIl1ll1) >= IIlIl11Il1lIIll1III1l) then
-			return I111I1l111Il1IIIl1ll1;
+		if op5A3 and (ax5B5 and cx771(cx591) >= imm702) then
+			return cx591;
 		end;
 	end;
 	return nil;
 end;
-local IllI1II111l1lIII1IllI1 = nil;
-local function III1I11I1Ill1lIlIIIIl()
-	local l1lIl1lll1l1I111IlI;
-	local I11IIllIl11lIIII1llIl1 = pcall(function()
-			l1lIl1lll1l1I111IlI = lIIlI1I1IlII11lllIl1l1(true);
-		end);
-	if not I11IIllIl11lIIII1llIl1 or not l1lIl1lll1l1I111IlI then
-		return nil;
-	end;
-	for IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1 in ipairs(l1lIl1lll1l1I111IlI) do
-		local l1111Il1I11II1I1l11111, ll11ll1I11lII1I1lll1I = pcall(function()
-				return type(I111I1l111Il1IIIl1ll1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("(\017T\000\021", -998405893)];
-			end);
-		if not (l1111Il1I11II1I1l11111 and ll11ll1I11lII1I1lll1I) then
-			continue;
-		end;
-		local ll1I11llIl1l1lIIllI, I1l1IlI11l1llII11II1l1, Il111I1lllll1ll1II111, lIIII11lI1llI1III1II11, lll1Il11ll111ll1lI1II = pcall(function()
-				return type(rawget(I111I1l111Il1IIIl1ll1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("1\152BU4\150\224a", -1564654214)])) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("T\172\169\225\253\237Ru", -822698515)], type(rawget(I111I1l111Il1IIIl1ll1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\230\015\141\2288\165", -273752227)])) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\023\191\212\232~/,X", -294462235)], type(rawget(I111I1l111Il1IIIl1ll1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\002\220\184\001\205rj\213hVb", -1674626978)])) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("hX\236j2\250\245\219", -294855463)], rawget(I111I1l111Il1IIIl1ll1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\142V$\177\181U\144\209\\", -1733938868)]) ~= nil;
-			end);
-		if ll1I11llIl1l1lIIllI and (I1l1IlI11l1llII11II1l1 and (Il111I1lllll1ll1II111 and (lIIII11lI1llI1III1II11 and lll1Il11ll111ll1lI1II))) then
-			return I111I1l111Il1IIIl1ll1;
-		end;
-	end;
-	return nil;
-end;
-local function Il1II1IlIlI1I1IIlI1I(l1lIl1lll1l1I111IlI)
-	if not l1lIl1lll1l1I111IlI then
-		return false;
-	end;
-	local I11IIllIl11lIIII1llIl1 = IlIIllIl1I1lll11I11l11(l1lIl1lll1l1I111IlI);
-	local I11II1IIIlI1I111llI11 = pcall(function()
-			if I11IIllIl11lIIII1llIl1 then
-				IIII1l1Il1111llIIlllI(I11IIllIl11lIIII1llIl1, false);
-			end;
-			IIII1l1Il1111llIIlllI(l1lIl1lll1l1I111IlI, false);
-			local IlIIl11l1lIIIl11l11ll1 = rawget(l1lIl1lll1l1I111IlI, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\225\0020R\183e\029\203", -583878043)]);
-			rawset(l1lIl1lll1l1I111IlI, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("f\021\143\025R\172\018Y", -1816909976)], lIIIlIIlI1llll1llIIII(function(I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, l1ll11IlIIl111I1l11I1)
-				if I1Illl1IllIIl11II111 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\180", -1169132384)] then
-					return true;
-				end;
-				if I1Illl1IllIIl11II111 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\001\187\189\008", -1536931640)] or I1Illl1IllIIl11II111 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("&", -679432447)] or I1Illl1IllIIl11II111 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1(":8f)\128", -1997532704)] or I1Illl1IllIIl11II111 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("e", -135860275)] then
-					Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\\\244\224\204|G\241\212\135&\161\174", -1232769782)]] += 0x1;
-					I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\234\144\0035\012\021\240\221)\132\025", -667570069)] .. (tostring(I1Illl1IllIIl11II111) .. (l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\001\190\237", -1706150756)] .. tostring(lIlIIll1Illlll1lI1IIl1))));
-					return true;
-				end;
-				if IlIIl11l1lIIIl11l11ll1 then
-					pcall(IlIIl11l1lIIIl11l11ll1, I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, l1ll11IlIIl111I1l11I1);
-				end;
-				Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\133\247J\167\237\247\128[8\135\006\161\147m\004C", -551698885)]] += 0x1;
-				return true;
-			end));
-			rawset(l1lIl1lll1l1I111IlI, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\159\151\242-\2529", -1381147814)], lIIIlIIlI1llll1llIIII(function(I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1)
- 
-			end));
-			IIII1l1Il1111llIIlllI(l1lIl1lll1l1I111IlI, true);
-			if I11IIllIl11lIIII1llIl1 then
-				IIII1l1Il1111llIIlllI(I11IIllIl11lIIII1llIl1, true);
-			end;
-		end);
-	if I11II1IIIlI1I111llI11 then
-		IllI1II111l1lIII1IllI1 = l1lIl1lll1l1I111IlI;
-		I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\004\148\027\003\140\n\134\002(\246\203\023\004\021\137\178\188\128", -267067351)]);
-		return true;
-	else
-		I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("1\187\202\137\r\196\228\012U@\175e\001\198&,5\129", -814965031)]);
-		return false;
-	end;
-end;
-local function lll1I1lIIllIl1lI11Il11(l1lIl1lll1l1I111IlI)
-	if not l1lIl1lll1l1I111IlI then
+local function sp795(bp58E)
+	if not bp58E then
 		return;
 	end;
-	if type(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\254I\163\"\005 ad", -347416939)]]) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\200\244y\185\012.@\r", -1588575584)] then
-		IIlI11lIIIIII11l1Il111(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("d<\164I\224\174m\230", -59705119)]], function(I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, l1ll11IlIIl111I1l11I1)
-			if I1Illl1IllIIl11II111 ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("f", -448083307)] then
-				Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\167\252\139\144N8\186!\196\171\149}j\146\143\000", -1499443904)]] += 0x1;
-			end;
-			return true;
+	if type(bp58E[bp85E[imm84C("8\137\171\207\000\139\225\160", -1427483180)]]) == bp85E[imm84C(">\229\023\235q\236z6", -1923540302)] then
+		sp74A(bp58E[bp85E[imm84C("\222\248!\1619\007K\030", -237509713)]], function(...)
+			ax65A[bp85E[imm84C("\154\196\152\188\0187\170\2048\157zl\"\146\026\234", -1446292586)]] += 0x1;
 		end);
 	end;
-	if type(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\215i\174\213Q\148\196\195\155Rm\012", -280830331)]]) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\213\210,%\228\186\144\140", -1367384834)] then
-		IIlI11lIIIIII11l1Il111(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("[\185WN\203\012-$\025\024\133\169", -1473163166)]], function(...)
-			Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\219\245\177n\011\007\000{s\154\163j", -864970525)]] += 0x1;
+	if type(bp58E[bp85E[imm84C("\249r3\008\199\236\011\127\170\219r`", -147067273)]]) == bp85E[imm84C("4\138\144\\N\243\217!", -27853651)] then
+		sp74A(bp58E[bp85E[imm84C("\242y\\`\130\237\2319\230 \0211", -321988195)]], function(...)
+			ax65A[bp85E[imm84C("\128\004\194\215\024A\007\198_\128\237B", -539050051)]] += 0x1;
 		end);
 	end;
-	if type(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\012\250\196\241\140\161+\227\161^QV\166\237\017", -989885953)]]) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("?q\149rR\160\199\157", -1619312906)] then
-		IIlI11lIIIIII11l1Il111(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\131\185\028\196I$\190\171na#\224`[\015", -1486663994)]], function(...)
-			Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("[\026\174|\219\190\134kF\157Z0\240S6\225.\169\157", -567886771)]] += 0x1;
+	if type(bp58E[bp85E[imm84C("\172\143M\029\227)?\244\195\133\008\249\179\170X", -1378329680)]]) == bp85E[imm84C("\029\168\193i\209r\185\166", -423768709)] then
+		sp74A(bp58E[bp85E[imm84C("\245\194\247\160@\'I\159\223\132IQm\168<", -894986929)]], function(...)
+			ax65A[bp85E[imm84C("wnI)S\234\146\155\020G\129m85\176\133\239\239Q", -839935009)]] += 0x1;
 		end);
 	end;
-	if type(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\236D\029\253\129a\199\17605P5\185\153", -793075339)]]) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("TV\183\243\170\1796\208", -310584583)] then
-		IIlI11lIIIIII11l1Il111(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\138,@\197\159\204P\208q\165\205_\1705", -829973233)]], function(...)
+	if type(bp58E[bp85E[imm84C("\229\191\189\0153\017u\127 \137\030 \018\022", -426521305)]]) == bp85E[imm84C("K\251\003*UO\196\209", -427569913)] then
+		sp74A(bp58E[bp85E[imm84C("\233\224\232c\162\177_{0X\146\009\200\153", -1255314854)]], function(...)
 			return nil;
 		end);
 	end;
-	if type(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("3>B\201\164\020\162@\004#\250\230\242T", -2030170628)]]) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("I\129\"\254\133\223]\012", -2044326836)] then
-		IIlI11lIIIIII11l1Il111(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\016cH;\018\226\1968\014\016\180\027\215Y", -1659356624)]], function(...)
+	if type(bp58E[bp85E[imm84C("\136\187p\238hh\155\211>\135\172$b\r", -1718996204)]]) == bp85E[imm84C("\147\237\179f\190>\247u", -2013851666)] then
+		sp74A(bp58E[bp85E[imm84C("V\167\201V\248\213\007\1611\144\144\168\229+", -2072573714)]], function(...)
  
 		end);
 	end;
-	if type(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\031\012\168\226c\184\018TT\183\011\178C", -1328389724)]]) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("K\024\245\'\202", -360131311)] then
-		local IlIIl11l1lIIIl11l11ll1 = getmetatable(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("M\172BU\248\226\r\213\250,\029\200&", -1559804402)]]) or {};
-		rawset(IlIIl11l1lIIIl11l11ll1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\023\140\003A\135\202\014", -1145604242)], function()
+	if type(bp58E[bp85E[imm84C("s\246\235\025etC@\250/\2452L", -1465101992)]]) == bp85E[imm84C("w\0205\169K", -608258179)] then
+		local cx591 = getmetatable(bp58E[bp85E[imm84C(" [ \175\'\179g\208\250}\237w|", -586696177)]]) or {};
+		rawset(cx591, bp85E[imm84C("^<Tq@\184%", -586761715)], function()
 			return false;
 		end);
-		rawset(IlIIl11l1lIIIl11l11ll1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\203\150n\142\024^\235>\'-", -1846205462)], function()
+		rawset(cx591, bp85E[imm84C("\023j\023\0119\026\023\223S\n", -1752551660)], function()
  
 		end);
-		rawset(IlIIl11l1lIIIl11l11ll1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\206\198M,f", -1176407102)], function()
+		rawset(cx591, bp85E[imm84C("\160pXod", -1505014634)], function()
 			return 0x0;
 		end);
-		pcall(setmetatable, l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\253Z\011\247\194.\165\001\209\216A!\226", -545800465)]], IlIIl11l1lIIIl11l11ll1);
+		pcall(setmetatable, bp58E[bp85E[imm84C("\151g\000j\245\133\194\217m\234\150\253\224", -1246598300)]], cx591);
 	end;
-	if type(l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\200n\150\222\201\127\000f\190\194\167\022\202\007x", -21562003)]]) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\199B4\031\143", -120983149)] then
-		local IlIIl11l1lIIIl11l11ll1 = {};
-		rawset(IlIIl11l1lIIIl11l11ll1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\235NWi\007\233\226", -1414637732)], function(I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1)
+	if type(bp58E[bp85E[imm84C("\202\160o\223\236\166z\197\252\137\255*\128)o", -1328848490)]]) == bp85E[imm84C("^qFha", -291381949)] then
+		local cx591 = {};
+		rawset(cx591, bp85E[imm84C("\154=\020\134\009\180\000", -426980071)], function(bp58E, cx591)
 			return { {
-					[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\026\"", -168301585)]] = lIlIIll1Illlll1lI1IIl1,
-					[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\220l\143\215R\199\0175", -616384891)]] = Illl1I1IIl1IIIlI1l11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\146Q\129\026", -675565705)]],
-					[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\146\247\243\197\001\252\2467M\155\215", -1294506578)]] = Illl1I1IIl1IIIlI1l11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("f0\246L\000\170\003K\025p\016", -281223559)]],
-					[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\154\003`/\017\147", -755980831)]] = Illl1I1IIl1IIIlI1l11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("_\199B_V\138", -1762120208)]],
+					[bp85E[imm84C("\219\022", -300360655)]] = cx591,
+					[bp85E[imm84C("\217\193\016\019\162.U\023", -1092715076)]] = v612[bp85E[imm84C("E\205b\130", -1235063612)]],
+					[bp85E[imm84C("\230\212\026\199N\140\202\192]\198\008", -232397749)]] = v612[bp85E[imm84C("\237r\235\178P\023\163\144\228\224\161", -125898499)]],
+					[bp85E[imm84C("\006z9\145M)", -1764217424)]] = v612[bp85E[imm84C("\182\152\131ip{", -861300397)]],
 				} };
 		end);
-		rawset(IlIIl11l1lIIIl11l11ll1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\243\168{Jxh\200\128\160\156", -1878515696)], function()
+		rawset(cx591, bp85E[imm84C("\153\172\165\209\201\233\237xR0", -915631399)], function()
  
 		end);
-		pcall(setmetatable, l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\015fO\006\152;\147\199\180\207\rY(\197\198", -575227027)]], IlIIl11l1lIIIl11l11ll1);
+		pcall(setmetatable, bp58E[bp85E[imm84C("\253\149\198\171+\179\1900A\1501^\016\140\018", -971928541)]], cx591);
 	end;
-	if l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("K\245\193\196\199N\157\144\182\165\236\020\250\251\008\165\2103", -249568705)]] ~= nil then
+	if bp58E[bp85E[imm84C("\245\129\028\021T7I\005ra/\144\192H\234\237\249&", -827876017)]] ~= nil then
 		pcall(function()
-			l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("}\211\199t\150\133\168\213\168\230\233\154X\171\005q\003\167", -1940449106)]] = math[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\148\014\031\193", -1712901170)]];
+			bp58E[bp85E[imm84C("\208\023f\147\176T\253\193\254\028\024\025\031(b\154|H", -211753279)]] = math[bp85E[imm84C("\007\004P\159", -610814161)]];
 		end);
 	end;
-	if l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\163\028*}\200\"\203\246\004\14077-&\209\168", -186586687)]] ~= nil then
+	if bp58E[bp85E[imm84C("\208x\195\186\008\174\023.\\\216\227\225\\\030g\184", -1436658500)]] ~= nil then
 		pcall(function()
-			l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\014\242\224o@\150{\153\148Q\243\149t\196\224\030", -1257346532)]] = false;
+			bp58E[bp85E[imm84C("\242P\237\206\177\161\138\002{\001\250:}P\244\177", -937979857)]] = false;
 		end);
 	end;
 end;
-local function l1I1lII1I1I1lllIl11lI()
-	local l1lIl1lll1l1I111IlI = tostring(Illl1I1IIl1IIIlI1l11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\224_\216\154X`", -1391830508)]]);
-	local I11IIllIl11lIIII1llIl1;
-	local I11II1IIIlI1I111llI11 = pcall(function()
-			I11IIllIl11lIIII1llIl1 = lIIlI1I1IlII11lllIl1l1(true);
+local function imm7A7()
+	local bp58E = tostring(v612[bp85E[imm84C("\247q\011\207\226\237", -1344905300)]]);
+	local cx591;
+	local op5A3 = pcall(function()
+			cx591 = bp5D9(true);
 		end);
-	if not I11II1IIIlI1I111llI11 or not I11IIllIl11lIIII1llIl1 then
+	if not op5A3 or not cx591 then
 		return;
 	end;
-	for IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1 in ipairs(I11IIllIl11lIIII1llIl1) do
-		local l1111Il1I11II1I1l11111, ll11ll1I11lII1I1lll1I = pcall(function()
-				return type(I111I1l111Il1IIIl1ll1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\0280\133q ", -669732823)];
+	for cx591, op5A3 in ipairs(cx591) do
+		local ax5B5, v5C7 = pcall(function()
+				return type(op5A3) == bp85E[imm84C("3\200u}\023", -659902123)];
 			end);
-		if not (l1111Il1I11II1I1l11111 and ll11ll1I11lII1I1lll1I) then
+		if not (ax5B5 and v5C7) then
 			continue;
 		end;
-		local ll1I11llIl1l1lIIllI, I1l1IlI11l1llII11II1l1, Il111I1lllll1ll1II111 = pcall(function()
-				return rawget(I111I1l111Il1IIIl1ll1, l1lIl1lll1l1I111IlI), rawget(I111I1l111Il1IIIl1ll1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\238~\163{M\169", -1471590254)]);
+		local bp5D9, cx5EB, op5FD = pcall(function()
+				return rawget(op5A3, bp58E), rawget(op5A3, bp85E[imm84C("\248WUt\166\139", -1785976040)]);
 			end);
-		if not (ll1I11llIl1l1lIIllI and type(I1l1IlI11l1llII11II1l1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("kd\225\226-", -457455241)]) then
+		if not (bp5D9 and type(cx5EB) == bp85E[imm84C("\212`\219\000\009", -233053129)]) then
 			continue;
 		end;
-		local lIIII11lI1llI1III1II11, lll1Il11ll111ll1lI1II = pcall(function()
-				return rawget(I1l1IlI11l1llII11II1l1, l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\190\247\n\019jN\241\006M8", -2063398394)]) ~= nil;
+		local ax600, v612 = pcall(function()
+				return rawget(cx5EB, bp85E[imm84C("\138\178\179\136\202j.\192\025B", -1227067976)]) ~= nil;
 			end);
-		if lIIII11lI1llI1III1II11 and (lll1Il11ll111ll1lI1II and Il111I1lllll1ll1II111 ~= nil) then
-			task[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\152\146\031\167f", -857368117)]](function()
-				while not llII1I11II1Il111lIlIl1 do
-					task[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("?\227\003a", -1100645174)]](0x8);
+		if ax600 and (v612 and op5FD ~= nil) then
+			task[bp85E[imm84C("\"\131@W\017", -585254341)]](function()
+				while not bp624 do
+					task[bp85E[imm84C("[5Ev", -1050770755)]](0x8);
 					pcall(function()
-						local IIlll1I1IlIIII11III1l1 = I111I1l111Il1IIIl1ll1[l1lIl1lll1l1I111IlI];
-						if IIlll1I1IlIIII11III1l1 then
-							IIlll1I1IlIIII11III1l1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("J\196\183\179\207\141\234\223\183\217", -2071918334)]] = os[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\214\219hI", -1071218611)]]();
-							IIlll1I1IlIIII11III1l1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("P\131Q\172g?\165\154%\025\157@", -1982000198)]] = true;
+						local cx591 = op5A3[bp58E];
+						if cx591 then
+							cx591[bp85E[imm84C("\153\231QK\233GX\252\129C", -1310760002)]] = os[bp85E[imm84C("H\218S\027", -509295799)]]();
+							cx591[bp85E[imm84C("\143\204\008\024>\204\n\008\130\179\199#", -2091972962)]] = true;
 						end;
 					end);
 				end;
@@ -519,393 +450,345 @@ local function l1I1lII1I1I1lllIl11lI()
 		end;
 	end;
 end;
-local function l1l1I1IllllI1II1l1()
-	local l1lIl1lll1l1I111IlI = getnamecallmethod;
-	l1lll111111I11ll111l1(game, function(IlIIl11l1lIIIl11l11ll1)
-		local I111I1l111Il1IIIl1ll1 = IlIIl11l1lIIIl11l11ll1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\139<\244\157\219\150\226l\022\151", -2095905242)]];
-		IlIIl11l1lIIIl11l11ll1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("#\142M\151\200Lm\178\008\188", -277881121)]] = lIIIlIIlI1llll1llIIII(function(I1Illl1IllIIl11II111, ...)
-				if ll11111I1I111I1lll1I() then
-					return I111I1l111Il1IIIl1ll1(I1Illl1IllIIl11II111, ...);
+local function bp7B9()
+	local op5A3 = getnamecallmethod;
+	op738(game, function(ax5B5)
+		local v5C7 = ax5B5[bp85E[imm84C("\025\017\142\219\212\016GhiW", -1393862186)]];
+		ax5B5[bp85E[imm84C("3W)U3\157\1570\130\242", -544358629)]] = bp58E(function(bp58E, ...)
+				if cx591() then
+					return v5C7(bp58E, ...);
 				end;
-				if type(I1Illl1IllIIl11II111) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("y\248v\179Q\'\018\179", -785145241)] and typeof(I1Illl1IllIIl11II111) ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\140\225\232\136L\235Z\215", -353315359)] then
-					return nil;
+				local ax5B5 = op5A3();
+				if rawget(ax6A5, ax5B5) then
+					return v5C7(bp58E, ...);
 				end;
-				local lIlIIll1Illlll1lI1IIl1 = l1lIl1lll1l1I111IlI();
-				if rawget(Il1Il1II1IllII1Il1I1l1, lIlIIll1Illlll1lI1IIl1) then
-					return I111I1l111Il1IIIl1ll1(I1Illl1IllIIl11II111, ...);
+				if not rawget(op693, ax5B5) then
+					return v5C7(bp58E, ...);
 				end;
-				if not rawget(lIIIIII1II11lIlI111, lIlIIll1Illlll1lI1IIl1) then
-					return I111I1l111Il1IIIl1ll1(I1Illl1IllIIl11II111, ...);
-				end;
-				if lIlIIll1Illlll1lI1IIl1 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1(" B\241l", -2048062502)] and I1Illl1IllIIl11II111 == Illl1I1IIl1IIIlI1l11 then
-					local lI111lIIII1I1IlIlIl1l1 = (tostring(... or l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("", -865494829)])):lower();
-					for llIIlll1Il1ll1IIIIlI = 0x1, #llll11lI1IIl1l1l1l1II, 0x1 do
-						if lI111lIIII1I1IlIlIl1l1:find(llll11lI1IIl1l1l1l1II[llIIlll1Il1ll1IIIIlI], 0x1, true) then
-							Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\243\130\254u\025\252\206v\022\194ga", -2106587936)]] += 0x1;
+				if ax5B5 == bp85E[imm84C("\008\224\191\011", -413610319)] and bp58E == v612 then
+					local bp58E = (tostring(... or bp85E[imm84C("", -1498526372)])):lower();
+					for cx591 = 0x1, #cx6DB, 0x1 do
+						if bp58E:find(cx6DB[cx591], 0x1, true) then
+							ax65A[bp85E[imm84C("en\240\245\1853\144\190\244_Y\n", -2095512014)]] += 0x1;
 							return nil;
 						end;
 					end;
 				end;
-				if lIlIIll1Illlll1lI1IIl1 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\149p\243~z\254\135|\134 ", -1803998990)] or lIlIIll1Illlll1lI1IIl1 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("w\165o\190D\026\024},|\199o", -1873665884)] then
-					local lI111lIIII1I1IlIlIl1l1;
-					local l1111111l1I11lII11Il1 = pcall(function()
-							lI111lIIII1I1IlIlIl1l1 = I1Illl1IllIIl11II111[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("#6*W", -603932671)]];
+				if ax5B5 == bp85E[imm84C("\016\2203o\209\024O\199\190\205", -2099116604)] or ax5B5 == bp85E[imm84C("\238\253\218\176\n\007\252F\211\222k\224", -679694599)] then
+					local cx591;
+					local op5A3 = pcall(function()
+							cx591 = bp58E[bp85E[imm84C("\218\242\015\173", -459028153)]];
 						end);
-					if l1111111l1I11lII11Il1 and rawget(IIl1IlIIl111l1lll1111, lI111lIIII1I1IlIlIl1l1) then
-						Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("5\017\003lKzi\160s\017\221\215\216\\", -65406925)]] += 0x1;
-						if lIlIIll1Illlll1lI1IIl1 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("4L\214<F\232\178%\251\157c\130", -1879695380)] then
-							return l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\171s\026U", -1087078808)];
+					if op5A3 and rawget(imm6B7, cx591) then
+						ax65A[bp85E[imm84C("\157__a\133\011\138%\248\003\219\216x\233", -941715523)]] += 0x1;
+						if ax5B5 == bp85E[imm84C("\209>!H\002\132:\194\030\173=\016", -1150322978)] then
+							return bp85E[imm84C("\020a\164\179", -1862000120)];
 						end;
 						return nil;
 					end;
-					Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\195\004\139\252\001\226_;.\240\246e", -619661791)]] += 0x1;
+					ax65A[bp85E[imm84C("\188\028\021\rD\024{\1663gR\160", -1489088900)]] += 0x1;
 				end;
-				if lIlIIll1Illlll1lI1IIl1 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\148\026\206Z\030\203,\216\1272\015", -1937237744)] or lIlIIll1Illlll1lI1IIl1 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\207\007t\004\194\238\205\230\231\253\242>\015\134", -1551350000)] then
-					local lI111lIIII1I1IlIlIl1l1 = I111I1l111Il1IIIl1ll1(I1Illl1IllIIl11II111, ...);
-					if type(lI111lIIII1I1IlIlIl1l1) ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("%\004+\230\012", -325002943)] then
-						return lI111lIIII1I1IlIlIl1l1;
+				if ax5B5 == bp85E[imm84C("\195\146\194\'dx\151\149\162\226\155", -399126421)] or ax5B5 == bp85E[imm84C("\170\129\\U\0226\165\209\193\194t\023\170\215", -2136080036)] then
+					local cx591 = v5C7(bp58E, ...);
+					if type(cx591) ~= bp85E[imm84C("3\220\151\\\134", -1305254810)] then
+						return cx591;
 					end;
-					local l1111111l1I11lII11Il1 = false;
-					for llIIlll1Il1ll1IIIIlI = 0x1, #lI111lIIII1I1IlIlIl1l1, 0x1 do
-						local IlII1lllIIlIII1lI1l111, I1111l1I11lI1II1I1llI = pcall(function()
-								return lI111lIIII1I1IlIlIl1l1[llIIlll1Il1ll1IIIIlI][l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\1690\187r", -165745603)]];
+					local op5A3 = false;
+					for bp58E = 0x1, #cx591, 0x1 do
+						local ax5B5, v5C7 = pcall(function()
+								return cx591[bp58E][bp85E[imm84C("o\148\233\248", -979072183)]];
 							end);
-						if IlII1lllIIlIII1lI1l111 and rawget(lIl1Il1I111I1IlllllI, I1111l1I11lI1II1I1llI) then
-							l1111111l1I11lII11Il1 = true;
+						if ax5B5 and rawget(op6ED, v5C7) then
+							op5A3 = true;
 							break;
 						end;
 					end;
-					if not l1111111l1I11lII11Il1 then
-						return lI111lIIII1I1IlIlIl1l1;
+					if not op5A3 then
+						return cx591;
 					end;
-					local IIlll1lI1I1I1I1lI1lI11, I1l1ll11lIlI1lIl1I1II = {}, 0x0;
-					for llIIlll1Il1ll1IIIIlI = 0x1, #lI111lIIII1I1IlIlIl1l1, 0x1 do
-						local IlII1lllIIlIII1lI1l111, I1111l1I11lI1II1I1llI = pcall(function()
-								return lI111lIIII1I1IlIlIl1l1[llIIlll1Il1ll1IIIIlI][l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\163\221\160:", -1104970682)]];
+					local ax5B5, bp5D9 = {}, 0x0;
+					for bp58E = 0x1, #cx591, 0x1 do
+						local op5A3, v5C7 = pcall(function()
+								return cx591[bp58E][bp85E[imm84C("\000\196\223\149", -1998515774)]];
 							end);
-						if not (IlII1lllIIlIII1lI1l111 and rawget(lIl1Il1I111I1IlllllI, I1111l1I11lI1II1I1llI)) then
-							I1l1ll11lIlI1lIl1I1II = I1l1ll11lIlI1lIl1I1II + 0x1;
-							IIlll1lI1I1I1I1lI1lI11[I1l1ll11lIlI1lIl1I1II] = lI111lIIII1I1IlIlIl1l1[llIIlll1Il1ll1IIIIlI];
+						if not (op5A3 and rawget(op6ED, v5C7)) then
+							bp5D9 = bp5D9 + 0x1;
+							ax5B5[bp5D9] = cx591[bp58E];
 						end;
 					end;
-					return IIlll1lI1I1I1I1lI1lI11;
+					return ax5B5;
 				end;
-				if lIlIIll1Illlll1lI1IIl1 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1(")\2371\2005(\026\217U-7\222\023\180", -1070759845)] or lIlIIll1Illlll1lI1IIl1 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("?4\193\171N\142\173\131\162J\022S\150\212w<w,\244\130\140", -720262621)] or lIlIIll1Illlll1lI1IIl1 == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\235$\200\162\129y\014V\203\222d3\000\183,Y\231\208\2429\'\"", -1989274916)] then
-					if rawget(lIl1Il1I111I1IlllllI, tostring(... or l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("", -2029515248)])) then
+				if ax5B5 == bp85E[imm84C("\153\249d\193\210#\209:\155\178\255\213\007\238", -1513403498)] or ax5B5 == bp85E[imm84C(",0o\148\233^\208\215\233\205\221<\148<\213\241\167\015\016\169\206", -1120306574)] or ax5B5 == bp85E[imm84C("\196\\hzw\184\228\246\132\005\241v\007\009\157?\136\160{\237|\148", -2042950538)] then
+					if rawget(op6ED, tostring(... or bp85E[imm84C("", -1343987768)])) then
 						return nil;
 					end;
 				end;
-				return I111I1l111Il1IIIl1ll1(I1Illl1IllIIl11II111, ...);
+				return v5C7(bp58E, ...);
 			end);
 	end);
 end;
-local function I1IllI1II1IIlllI1l11l1()
-	l1lll111111I11ll111l1(game, function(IlIIl11l1lIIIl11l11ll1)
-		local I111I1l111Il1IIIl1ll1 = IlIIl11l1lIIIl11l11ll1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\031\201>\007\229\235\212", -1564850828)]];
-		local l1111Il1I11II1I1l11111 = IlIIl11l1lIIIl11l11ll1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("h\187\008Q\188\149\024\225\2446", -1535817494)]];
-		IlIIl11l1lIIIl11l11ll1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\201\192\229$A\175\204", -1444523060)]] = lIIIlIIlI1llll1llIIII(function(I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, ...)
-				if ll11111I1I111I1lll1I() then
-					return I111I1l111Il1IIIl1ll1(I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, ...);
+local function cx7CB()
+	op738(game, function(op5A3)
+		local ax5B5 = op5A3[bp85E[imm84C(";zd\127\020\255\183", -852518305)]];
+		local v5C7 = op5A3[bp85E[imm84C("c\230\004\196\127\180\245\148\028\164", -309601513)]];
+		op5A3[bp85E[imm84C("\000\250\138\151\181\159W", -1903026908)]] = bp58E(function(bp58E, op5A3, ...)
+				if cx591() then
+					return ax5B5(bp58E, op5A3, ...);
 				end;
-				if type(I1Illl1IllIIl11II111) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\194r}c\178O\199\245", -1636156172)] and typeof(I1Illl1IllIIl11II111) ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\017\254\177\190\246R\239\031", -2087123150)] then
+				if type(op5A3) == bp85E[imm84C("\151\246\236\016\248\203", -1531098758)] and rawget(bp67E, op5A3) then
 					return nil;
 				end;
-				if type(lIlIIll1Illlll1lI1IIl1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("_\158zgg\017", -688149001)] and rawget(l1l11lII11lllllII1l111, lIlIIll1Illlll1lI1IIl1) then
-					return nil;
-				end;
-				return I111I1l111Il1IIIl1ll1(I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, ...);
+				return ax5B5(bp58E, op5A3, ...);
 			end);
-		IlIIl11l1lIIIl11l11ll1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\129c\216\217?\137\\F\210\170", -1297783478)]] = lIIIlIIlI1llll1llIIII(function(I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, l1ll11IlIIl111I1l11I1, ...)
-				if ll11111I1I111I1lll1I() then
-					if l1111Il1I11II1I1l11111 then
-						return l1111Il1I11II1I1l11111(I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, l1ll11IlIIl111I1l11I1, ...);
+		op5A3[bp85E[imm84C("\226\226\245A\rm\015\174Q\138", -1211338856)]] = bp58E(function(bp58E, op5A3, ax5B5, ...)
+				if cx591() then
+					if v5C7 then
+						return v5C7(bp58E, op5A3, ax5B5, ...);
 					end;
-					return rawset(I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, l1ll11IlIIl111I1l11I1);
+					return rawset(bp58E, op5A3, ax5B5);
 				end;
-				if rawget(lI1I1IllIl11lI1l11IlI, lIlIIll1Illlll1lI1IIl1) then
+				if rawget(cx681, op5A3) then
 					return;
 				end;
-				if type(l1ll11IlIIl111I1l11I1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("}\172(\1501_\131\222", -1006008301)] then
-					return;
-				end;
-				if l1111Il1I11II1I1l11111 then
-					pcall(l1111Il1I11II1I1l11111, I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, l1ll11IlIIl111I1l11I1, ...);
+				if v5C7 then
+					pcall(v5C7, bp58E, op5A3, ax5B5, ...);
 				else
-					pcall(rawset, I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1, l1ll11IlIIl111I1l11I1);
+					pcall(rawset, bp58E, op5A3, ax5B5);
 				end;
 			end);
 	end);
-	local l1lIl1lll1l1I111IlI = lIlII1II1l1lII11I1Ill1(function()
-			return game:GetService(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("P\242\217\"q\139\216\025\027", -246947185)]);
+	local v5C7 = cx726(function()
+			return game:GetService(bp85E[imm84C("\162\225\129\007=fR\137\009", -100600831)]);
 		end);
-	if l1lIl1lll1l1I111IlI and IlIIllIl1I1lll11I11l11(l1lIl1lll1l1I111IlI) ~= IlIIllIl1I1lll11I11l11(game) then
-		l1lll111111I11ll111l1(l1lIl1lll1l1I111IlI, function(I1Illl1IllIIl11II111)
-			local lIlIIll1Illlll1lI1IIl1 = I1Illl1IllIIl11II111[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("U\196\006.y\025\223", -1717488830)]];
-			I1Illl1IllIIl11II111[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\008\nqe(\018\138", -748509499)]] = lIIIlIIlI1llll1llIIII(function(lI111lIIII1I1IlIlIl1l1, l1111111l1I11lII11Il1, ...)
-					if ll11111I1I111I1lll1I() then
-						return lIlIIll1Illlll1lI1IIl1(lI111lIIII1I1IlIlIl1l1, l1111111l1I11lII11Il1, ...);
+	if v5C7 and op5A3(v5C7) ~= op5A3(game) then
+		op738(v5C7, function(op5A3)
+			local ax5B5 = op5A3[bp85E[imm84C("\197\176\148)g\226\027", -1928259038)]];
+			op5A3[bp85E[imm84C("\142\1541\162\"Y\131", -1553774906)]] = bp58E(function(bp58E, op5A3, ...)
+					if cx591() then
+						return ax5B5(bp58E, op5A3, ...);
 					end;
-					if type(lI111lIIII1I1IlIlIl1l1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\026\197\186\167N6|\009", -2071852796)] and typeof(lI111lIIII1I1IlIlIl1l1) ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("q\144>\193\242\029\022\238", -1316265194)] then
+					if type(op5A3) == bp85E[imm84C(" %\234H\150\144", -1674954668)] and rawget(bp67E, op5A3) then
 						return nil;
 					end;
-					if type(l1111111l1I11lII11Il1) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("l\187`F\002;", -1769984768)] and rawget(l1l11lII11lllllII1l111, l1111111l1I11lII11Il1) then
-						return nil;
-					end;
-					return lIlIIll1Illlll1lI1IIl1(lI111lIIII1I1IlIlIl1l1, l1111111l1I11lII11Il1, ...);
+					return ax5B5(bp58E, op5A3, ...);
 				end);
 		end);
 	end;
-	local I11IIllIl11lIIII1llIl1 = IlIIllIl1I1lll11I11l11(Enum);
-	if I11IIllIl11lIIII1llIl1 then
+	local bp5D9 = op5A3(Enum);
+	if bp5D9 then
 		pcall(function()
-			IIII1l1Il1111llIIlllI(I11IIllIl11lIIII1llIl1, false);
-			local I1Illl1IllIIl11II111 = I11IIllIl11lIIII1llIl1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\016\232\207_\236k\232#-\244", -611993845)]];
-			I11IIllIl11lIIII1llIl1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\156\234V\028V\200x\176\185y", -929263303)]] = lIIIlIIlI1llll1llIIII(function(lI111lIIII1I1IlIlIl1l1, l1111111l1I11lII11Il1, IIlll1lI1I1I1I1lI1lI11, ...)
-					if ll11111I1I111I1lll1I() then
-						if I1Illl1IllIIl11II111 then
-							return I1Illl1IllIIl11II111(lI111lIIII1I1IlIlIl1l1, l1111111l1I11lII11Il1, IIlll1lI1I1I1I1lI1lI11, ...);
+			ax5B5(bp5D9, false);
+			local op5A3 = bp5D9[bp85E[imm84C("T\143\167\019\025\023\253\009\001J", -1079017634)]];
+			bp5D9[bp85E[imm84C("\130\138IT\148i\237\145)I", -1469755190)]] = bp58E(function(bp58E, ax5B5, v5C7, ...)
+					if cx591() then
+						if op5A3 then
+							return op5A3(bp58E, ax5B5, v5C7, ...);
 						end;
 						return;
 					end;
-					if rawget(lI1I1IllIl11lI1l11IlI, l1111111l1I11lII11Il1) then
+					if rawget(cx681, ax5B5) then
 						return;
 					end;
-					if I1Illl1IllIIl11II111 then
-						pcall(I1Illl1IllIIl11II111, lI111lIIII1I1IlIlIl1l1, l1111111l1I11lII11Il1, IIlll1lI1I1I1I1lI1lI11, ...);
+					if op5A3 then
+						pcall(op5A3, bp58E, ax5B5, v5C7, ...);
 					end;
 				end);
-			IIII1l1Il1111llIIlllI(I11IIllIl11lIIII1llIl1, true);
+			ax5B5(bp5D9, true);
 		end);
 	end;
 end;
-local function I1lIII1l1II11lI1Ill11()
-	if not l1IIlI1l1llIl1I11Il11 then
+local function dx7DD()
+	if not cx5EB then
 		return;
 	end;
-	pcall(lII1I1ll1Il1ll1II111I1, l1IIlI1l1llIl1I11Il11, lIIIlIIlI1llll1llIIII(function(...)
-		if ll11111I1I111I1lll1I() then
-			return l1IIlI1l1llIl1I11Il11(...);
+	pcall(v5C7, cx5EB, bp58E(function(...)
+		if cx591() then
+			return cx5EB(...);
 		end;
-		return ll1111llIlIIl1llI1l1I1;
+		return bp714;
 	end));
-	if I11Il11ll1IIlIlIIllI11 then
-		pcall(lII1I1ll1Il1ll1II111I1, I11Il11ll1IIlIlIIllI11, lIIIlIIlI1llll1llIIII(function(I1Illl1IllIIl11II111, ...)
-			if ll11111I1I111I1lll1I() then
-				return I11Il11ll1IIlIlIIllI11(I1Illl1IllIIl11II111, ...);
+	if op5FD then
+		pcall(v5C7, op5FD, bp58E(function(bp58E, ...)
+			if cx591() then
+				return op5FD(bp58E, ...);
 			end;
 		end));
 	end;
-	for IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1 in ipairs({ l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\176\030\212bs4\241\135\183/&", -982086931)], l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\230\006h\008\220|\134\031\145E\"\1548\156\021}\005\175\n", -657083989)], l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\151\017\136\177M\214D\170\142\190\197W\198\174\185\153\233", -1106936822)] }) do
-		local l1111Il1I11II1I1l11111 = rawget(getgenv(), I111I1l111Il1IIIl1ll1) or rawget(getrenv(), I111I1l111Il1IIIl1ll1);
-		if l1111Il1I11II1I1l11111 and (l1111Il1I11II1I1l11111 ~= l1IIlI1l1llIl1I11Il11 and type(l1111Il1I11II1I1l11111) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\195)\194\146\188\1434\184", -1184927042)]) then
-			pcall(lII1I1ll1Il1ll1II111I1, l1111Il1I11II1I1l11111, lIIIlIIlI1llll1llIIII(function(...)
-				if ll11111I1I111I1lll1I() then
-					return l1111Il1I11II1I1l11111(...);
+	for op5A3, ax5B5 in ipairs({ bp85E[imm84C("\249+?)?\242\154,\211\173!", -1107002360)], bp85E[imm84C("\027~\000d\144\0031\001\008{\n\134:\167m\007\031\224\163", -248192407)], bp85E[imm84C("\174\254z\172d\247<=\015\203\230I\255\029\185J\011", -1853218028)] }) do
+		local bp5D9 = rawget(getgenv(), ax5B5) or rawget(getrenv(), ax5B5);
+		if bp5D9 and (bp5D9 ~= cx5EB and type(bp5D9) == bp85E[imm84C("\238\210N+\0173\133=", -2136473264)]) then
+			pcall(v5C7, bp5D9, bp58E(function(...)
+				if cx591() then
+					return bp5D9(...);
 				end;
-				return ll1111llIlIIl1llI1l1I1;
+				return bp714;
 			end));
 		end;
 	end;
 end;
-local function ll1I1Il111IIll1lll1I11()
-	local function l1lIl1lll1l1I111IlI(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1)
-		if type(IlIIl11l1lIIIl11l11ll1) ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\003\022\128@\135\134\144\252", -333522883)] then
+local function sp7E0()
+	local function cx591(cx591, op5A3)
+		if type(cx591) ~= bp85E[imm84C("\223}\160\131\166\249E\242", -1988291846)] then
 			return;
 		end;
-		pcall(lII1I1ll1Il1ll1II111I1, IlIIl11l1lIIIl11l11ll1, lIIIlIIlI1llll1llIIII(function(I1Illl1IllIIl11II111, ...)
-			if Ill111111I1II111Il11I(I1Illl1IllIIl11II111) then
-				return I111I1l111Il1IIIl1ll1;
+		pcall(v5C7, cx591, bp58E(function(bp58E, ...)
+			if imm75C(bp58E) then
+				return op5A3;
 			end;
-			return IlIIl11l1lIIIl11l11ll1(I1Illl1IllIIl11II111, ...);
+			return cx591(bp58E, ...);
 		end));
 	end;
-	l1lIl1lll1l1I111IlI(debug[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\215\008\192\024", -1261540964)]] or debug[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\174\"\248\252/\136\030", -1979247602)]], nil);
-	l1lIl1lll1l1I111IlI(debug[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("|\168\230q\151I\218\142\142|\155", -967603033)]], {});
-	l1lIl1lll1l1I111IlI(debug[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\020(?Ab>\193\173\175", -1072070605)]], {});
-	l1lIl1lll1l1I111IlI(debug[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("M\201U8\190\014\255\154\149r\178\219", -551961037)]], {});
+	cx591(debug[bp85E[imm84C("\145[]@", -658329211)]] or debug[bp85E[imm84C(")\015J>Y\238\147", -1464249998)]], nil);
+	cx591(debug[bp85E[imm84C("\196\240e>B\149\131\191\008 \030", -833446747)]], {});
+	cx591(debug[bp85E[imm84C("j;\160\144\160V\021a&", -258416335)]], {});
+	cx591(debug[bp85E[imm84C("F\"`\176^.v|\030\004\192s", -1780143158)]], {});
 end;
-local function ll11lIll1l1I1ll1lllII()
-	local l1lIl1lll1l1I111IlI = Illl1I1IIl1IIIlI1l11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("/\222*|", -734877595)]];
-	IIlI11lIIIIII11l1Il111(l1lIl1lll1l1I111IlI, function(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1, ...)
-		if ll11111I1I111I1lll1I() then
-			return l1lIl1lll1l1I111IlI(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1, ...);
+local function imm7F2()
+	local bp58E = v612[bp85E[imm84C("\152\167~\201", -239606929)]];
+	sp74A(bp58E, function(op5A3, ax5B5, ...)
+		if cx591() then
+			return bp58E(op5A3, ax5B5, ...);
 		end;
-		if IlIIl11l1lIIIl11l11ll1 == Illl1I1IIl1IIIlI1l11 then
-			local I1Illl1IllIIl11II111 = (tostring(I111I1l111Il1IIIl1ll1 or l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("", -647187751)])):lower();
-			for lI111lIIII1I1IlIlIl1l1, l1111111l1I11lII11Il1 in ipairs(llll11lI1IIl1l1l1l1II) do
-				if I1Illl1IllIIl11II111:find(l1111111l1I11lII11Il1, 0x1, true) then
-					Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("3\225\174\127{\128~7,E\131\245", -876963979)]] += 0x1;
+		if op5A3 == v612 then
+			local bp58E = (tostring(ax5B5 or bp85E[imm84C("", -354167353)])):lower();
+			for cx591, op5A3 in ipairs(cx6DB) do
+				if bp58E:find(op5A3, 0x1, true) then
+					ax65A[bp85E[imm84C("\228\0206B+Se\196\210f\021\234", -905473009)]] += 0x1;
 					return nil;
 				end;
 			end;
 		end;
-		return l1lIl1lll1l1I111IlI(IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1, ...);
+		return bp58E(op5A3, ax5B5, ...);
 	end);
 end;
-local lI1llI11Il1Il1IlII11;
-lI1llI11Il1Il1IlII11 = lII1I1ll1Il1ll1II111I1((getrenv())[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("|\226\164\212o\027\031", -1607712680)]], lIIIlIIlI1llll1llIIII(function(l1lIl1lll1l1I111IlI)
-		if ll11111I1I111I1lll1I() then
-			return lI1llI11Il1Il1IlII11(l1lIl1lll1l1I111IlI);
+local bp804;
+bp804 = v5C7((getrenv())[bp85E[imm84C("\176\201\002\189+n\201", -1158318614)]], bp58E(function(bp58E)
+		if cx591() then
+			return bp804(bp58E);
 		end;
-		if typeof(l1lIl1lll1l1I111IlI) == l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\242\008\130d\135>0\n", -858547801)] then
-			local IlIIl11l1lIIIl11l11ll1 = l1lIl1lll1l1I111IlI[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\218d\186\213", -2068379282)]]:lower();
-			if IlIIl11l1lIIIl11l11ll1:find(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("y\166\166\215\205\145", -1341235172)], 0x1, true) or IlIIl11l1lIIIl11l11ll1:find(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\215&\183\150", -816537943)], 0x1, true) or IlIIl11l1lIIIl11l11ll1:find(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("PW\192\232\\ ", -21627541)], 0x1, true) then
-				return setmetatable({}, { [l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\162\182\193\026\014V\128", -1245418616)]] = function()
+		if typeof(bp58E) == bp85E[imm84C("\r\014g\192\215\254\027\148", -1305582500)] then
+			local cx591 = bp58E[bp85E[imm84C("\215j\140\171", -817062247)]]:lower();
+			if cx591:find(bp85E[imm84C("\222O\015O:L", -1927079354)], 0x1, true) or cx591:find(bp85E[imm84C("a\167KF", -77924683)], 0x1, true) or cx591:find(bp85E[imm84C("\240\240O\134\244C", -1013807323)], 0x1, true) then
+				return setmetatable({}, { [bp85E[imm84C("\211$\247\153{.K", -735991741)]] = function()
 						return function()
  
 						end;
-					end, [l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\247\244Q\1449W\212|&\190", -1164741338)]] = function()
+					end, [bp85E[imm84C("p\201\160\225\024t\129\163F\255", -1050443065)]] = function()
  
-					end, [l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("&Z\144\1328\164", -2122382594)]] = function()
+					end, [bp85E[imm84C("\011\024\004\204Gb", -853697989)]] = function()
 						return {};
 					end });
 			end;
 		end;
-		return lI1llI11Il1Il1IlII11(l1lIl1lll1l1I111IlI);
+		return bp804(bp58E);
 	end));
-local function II111II1l1l1IllllIIIl1()
-	local function l1lIl1lll1l1I111IlI(IlIIl11l1lIIIl11l11ll1)
-		if typeof(IlIIl11l1lIIIl11l11ll1) ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("7\191\207\144\174\162\212\024\158\164!", -222435973)] and typeof(IlIIl11l1lIIIl11l11ll1) ~= l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\132?\167\232\127t\233\1312\029\165\029\1317", -1160612444)] then
+local function cx816()
+	local function bp58E(bp58E)
+		if typeof(bp58E) ~= bp85E[imm84C("\001E\016\029\227\011\157\002\231\236\004", -562119427)] and typeof(bp58E) ~= bp85E[imm84C("\173\184P\026\009\142\009J\238\181\011*\2090", -1082163458)] then
 			return;
 		end;
-		local I111I1l111Il1IIIl1ll1, l1111Il1I11II1I1l11111 = pcall(function()
-				return IlIIl11l1lIIIl11l11ll1[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("qQ_x", -2051208326)]];
+		local cx591, op5A3 = pcall(function()
+				return bp58E[bp85E[imm84C("hk|O", -2070083270)]];
 			end);
-		if not I111I1l111Il1IIIl1ll1 then
+		if not cx591 then
 			return;
 		end;
-		local ll11ll1I11lII1I1lll1I = l1111Il1I11II1I1l11111:lower();
-		for I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1 in ipairs(llllIlII1llIlII1llII11) do
-			if ll11ll1I11lII1I1lll1I:find(lIlIIll1Illlll1lI1IIl1, 0x1, true) then
-				rawset(IIl1IlIIl111l1lll1111, l1111Il1I11II1I1l11111, true);
+		local ax5B5 = op5A3:lower();
+		for bp58E, cx591 in ipairs(bp6C9) do
+			if ax5B5:find(cx591, 0x1, true) then
+				rawset(imm6B7, op5A3, true);
 				break;
 			end;
 		end;
 	end;
 	pcall(function()
-		for I1Illl1IllIIl11II111, lIlIIll1Illlll1lI1IIl1 in ipairs(game:GetDescendants()) do
-			l1lIl1lll1l1I111IlI(lIlIIll1Illlll1lI1IIl1);
+		for cx591, op5A3 in ipairs(game:GetDescendants()) do
+			bp58E(op5A3);
 		end;
 	end);
 	pcall(function()
-		game[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\174\200\154\1337^\213M\192e{x\194_\238", -1748357228)]]:Connect(function(I1Illl1IllIIl11II111)
-			task[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\r\224c\203\172", -1270454132)]](l1lIl1lll1l1I111IlI, I1Illl1IllIIl11II111);
+		game[bp85E[imm84C("\186\006?\192@\131\022\224\203\210\144I\130\250Y", -970093477)]]:Connect(function(cx591)
+			task[bp85E[imm84C("\006\143\127*L", -1294899806)]](bp58E, cx591);
 		end);
 	end);
 end;
-local function Illl1l1I1ll1IlI1lI1I1()
-	local l1lIl1lll1l1I111IlI = lIIIIIl1Il11l1IlIII11();
-	if l1lIl1lll1l1I111IlI and l1lIl1lll1l1I111IlI ~= llllIIIIIlIII1lll1Il1 then
-		llllIIIIIlIII1lll1Il1 = l1lIl1lll1l1I111IlI;
-		lll1I1lIIllIl1lI11Il11(l1lIl1lll1l1I111IlI);
-		I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\158\143\213 \020\212\251\166\239\234\247\193 \242\020{\130\'U.\229&}\011\162\007i\205\131\128\1413\182\182\1588f\236B\246|\235\216\138\1705Z\216\214\131\1458Nn", -1514386568)]);
+local function dx828()
+	local bp58E = op783();
+	if bp58E and bp58E ~= cx636 then
+		cx636 = bp58E;
+		sp795(bp58E);
+		imm66C(bp85E[imm84C("\017\206\184D\173\153\234\005-\027@U\194\175Z\137\185\246\021\024t5K\239\148\160\018m\157\184p\134.", -323036803)]);
 	end;
-	if not IllI1II111l1lIII1IllI1 then
-		local IlIIl11l1lIIIl11l11ll1 = III1I11I1Ill1lIlIIIIl();
-		if IlIIl11l1lIIIl11l11ll1 then
-			Il1II1IlIlI1I1IIlI1I(IlIIl11l1lIIIl11l11ll1);
-		end;
-	end;
-	l1I1lII1I1I1lllIl11lI();
+	imm7A7();
 end;
-local function l1I1llI11I11Ill111IlI1()
-	l1l1I1IllllI1II1l1();
-	I1IllI1II1IIlllI1l11l1();
-	I1lIII1l1II11lI1Ill11();
-	ll1I1Il111IIll1lll1I11();
-	ll11lIll1l1I1ll1lllII();
-	II111II1l1l1IllllIIIl1();
-	llllIIIIIlIII1lll1Il1 = lIIIIIl1Il11l1IlIII11();
-	if llllIIIIIlIII1lll1Il1 then
-		lll1I1lIIllIl1lI11Il11(llllIIIIIlIII1lll1Il1);
-		I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\163!\195\250\188\136\255]1\191\001V\233\157^`\234(\175\146\144\254\213\207\178s\224\228\235\225\189\221\140\161Q\165\216\1298W\r\025\021\146\175", -2144796590)]);
+local function sp83A()
+	bp7B9();
+	cx7CB();
+	dx7DD();
+	sp7E0();
+	imm7F2();
+	cx816();
+	cx636 = op783();
+	if cx636 then
+		sp795(cx636);
+		imm66C(bp85E[imm84C("h\180BS\195\024M$\184\130\225\138#7\218o\152Z\2446\133\005\188\025\004rI\146\139/\139\002", -1006663681)]);
 	else
-		I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\222\200u}\164V\148\226\017\025@)flI\184l\206\221{\210Q<N\243\023\183\\8\151\236\131\136\181\205[R\029\169\027\154\214\156!b\228\245H", -1714932848)]);
+		imm66C(bp85E[imm84C("\171\201t\236\230\143=\198\250`\177\015\136\170\227s\175;\171{t\153\212F\007\'S\138\025\011\023\030\1920\144\199\005-\130K\173\020S\164\005", -512638237)]);
 	end;
-	local l1lIl1lll1l1I111IlI = III1I11I1Ill1lIlIIIIl();
-	if l1lIl1lll1l1I111IlI then
-		Il1II1IlIlI1I1IIlI1I(l1lIl1lll1l1I111IlI);
-		I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\007\166\219\144\159\253\246\233]\211\208\009.\210\1347P\211\0084>\213\137g\171\138,\211\187\178\133\164x\182\171c\170\143\145\149\011\007", -230497147)]);
-	else
-		I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\0202\014k\205\243\175y,3\197`\194\204X\018\144V}\235\241##\216\166\166^\244\158a[\150\215g\208\129\163\219\169\009\175\005\030X\239e\240\255\128 \186", -660229813)]);
-	end;
-	l1I1lII1I1I1lllIl11lI();
-	task[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\026S\146\206\181", -157291201)]](function()
-		while not llII1I11II1Il111lIlIl1 do
-			task[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\251\252{\020", -2020143314)]](0xF);
-			Illl1l1I1ll1IlI1lI1I1();
+	imm7A7();
+	task[bp85E[imm84C("?\234\225\022\148", -930639601)]](function()
+		while not bp624 do
+			task[bp85E[imm84C("\171\022\255\248", -1714080854)]](0xF);
+			dx828();
 		end;
 	end);
-	task[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\240\236I\161\142", -1190366696)]](function()
-		while not llII1I11II1Il111lIlIl1 do
-			task[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\023\229\161\131", -932933431)]](0x3C);
-			I1IIllIIIIII11llIIII(string[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1(", \191\133\129\195", -53937775)]](l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\016B\250\016/\152\230{T\195\186\233;*\159\221n\005\228=\245\134\166\236\148\030\246\17816\248\018Z\210/\149)\008\029`\128\193<\129g`\129\142\148\254]&q\165\024\174\187\221\244\187\194\028*\149\180\239\232\157\168\"D\130;x\193\005:", -1885135034)], Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\185x\246I\004\255\201a9\196\014O", -2129853926)]], Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\238\221\188\186G\202qo\144\132\001\245u\133", -1062174367)]], Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\169\134\187g\236\198\201\149\239X\022\245\149\015\171\163", -793534105)]], Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\'-1\152\230\232}\163\218K\022\251}\212\195\238eId", -734549905)]], Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("$\rA\140\020\217\252\150\182\189=:\197X\009", -1911219158)]], Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\008\215\180\210\135\243r\235\141ap\175", -1240765418)]]));
+	task[bp85E[imm84C("\219\153Gd\028", -2083780712)]](function()
+		while not bp624 do
+			task[bp85E[imm84C("@\016J\144", -1752092894)]](0x3C);
+			imm66C(string[bp85E[imm84C("\024\168O\160JQ", -447231313)]](bp85E[imm84C("$#a3\230\155`\183\198\236\177l\2326c\217\024\"1\183\018#=j2\158\221\167\232A[\171\138C\198q\160\170\157\131\019\154\019\189.\251\143\241c\1707\007\161\180y~\030<`\003\127=|o\0201\151\2402\240\132\228\000\186\189\243]", -1500492512)], ax65A[bp85E[imm84C("pl\247\151Y\204}\219\171\192\214u", -774462547)]], ax65A[bp85E[imm84C("\1611~\000\190c\210\197\156id$%w", -142282999)]], ax65A[bp85E[imm84C("\165\255x\002\155*63W\234\139\150\141\204W6", -216930781)]], ax65A[bp85E[imm84C("U\249\224\152=^P\230\237\221\004\215\197\027\178\166\007\1630", -780885271)]], ax65A[bp85E[imm84C("%\"\187S\157\n\180\210\193\176\016x\131\252\140", -1094877830)]], ax65A[bp85E[imm84C("}e>\181I\004\137d\141\159,^", -1428662864)]]));
 		end;
 	end);
 end;
-(getgenv())[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\183\023\235\220\140\196\000\r", -1794627056)]] = {
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\012)\019{T\015\254", -1396156016)]] = l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("~\n\200", -612976915)],
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\187\023\145wKb\142\248", -244325665)]] = function()
+(getgenv())[bp85E[imm84C("\150\133\190Q\\\157Y\152", -1565244056)]] = {
+		[bp85E[imm84C("8\204\252\217L.\159", -1100120870)]] = bp85E[imm84C("\164U\254", -101977129)],
+		[bp85E[imm84C("\2023\196D:\255\220\008", -1849482362)]] = function()
 			return {
-				[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("P\168\237\145\020J\001\249\243v-\233", -32965615)]] = Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("u&\224\197\172.\187\140\237|D\185", -1895817728)]],
-				[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\164&\189<\154\224\015\169\197\\\018u\141\029", -1864359488)]] = Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("UA\203p\141\132\127v\193swa/1", -1581628556)]],
-				[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\226\245c0\188\239\008\014\002<\127\025A\134\223\148", -850683241)]] = Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\132\020\015\137\174\229\\\224\133\197\195M\155\145;\018", -1953818858)]],
-				[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("N\003\188{\148\230\011\029`Z\178\223+R,y\207\207\197", -1140885506)]] = Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\230t~\000d\139\223Cx\184\148\004\231\'\194\016\225+7", -1629930062)]],
-				[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("|\159YM\220\135x_jl[\245\192\002\182", -1204195214)]] = Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1(":\019\'\225X\229\176\175V\138\023\017\184^=", -1968958136)]],
-				[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("UT1\132\171\148u\176\208\173ua", -891972181)]] = Ill11l1ll1lllIl1Illl11[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\205\142\168\202\202\157D\178\169\164\165z", -357116563)]],
+				[bp85E[imm84C("\149\165\002\136-a\151?\172\171_\027", -934178653)]] = ax65A[bp85E[imm84C("\127\134c\220\220\172%\004\190*N\178", -750999943)]],
+				[bp85E[imm84C("\210\002J\211\012ro\218x\011\161\147\177)", -330377059)]] = ax65A[bp85E[imm84C("oC6\245\212fC\215\025\001M\200\004x", -487799335)]],
+				[bp85E[imm84C("\211\129Q\195\176\004g\235\206c\159S2&C\198", -1415489726)]] = ax65A[bp85E[imm84C("?\186`5\012Gt)>\n\209\139_\141\166\211", -1247646908)]],
+				[bp85E[imm84C("\160HZ\150R\230\150\209\182\231v\196D\234\216\164#U\172", -304882777)]] = ax65A[bp85E[imm84C("\r\0014E^K\233\155\014\255\204\016Y2@<\128\231\186", -84281869)]],
+				[bp85E[imm84C("o\177x|\155]\202\208V\215A\230\019\005%", -915893551)]] = ax65A[bp85E[imm84C("\226\200;t)s\214\211+\2266\000\145$\031", -146084203)]],
+				[bp85E[imm84C("\182\214\225\160_C\161\182\142\205\154\171", -240721075)]] = ax65A[bp85E[imm84C("7\255\134\231H7c\164nHX;", -942108751)]],
 			};
 		end,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\183\201\147\216ER\168=\000\029", -1790694776)]] = function()
-			for IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1 in pairs(Ill11l1ll1lllIl1Illl11) do
-				I1IIllIIIIII11llIIII(string[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\254,\186\201\030\186", -1268946758)]](l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("f\153N!V(\220\023", -2099771984)], IlIIl11l1lIIIl11l11ll1, I111I1l111Il1IIIl1ll1));
+		[bp85E[imm84C("\221:_\218\236m\249\173\179\'", -1048083697)]] = function()
+			for bp58E, cx591 in pairs(ax65A) do
+				print(string[bp85E[imm84C(" \0166\208\138\011", -1149536522)]](bp85E[imm84C("J\189S8\002\240\244-", -987067819)], bp58E, cx591));
 			end;
 		end,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("(\128\127&+\023", -1142786108)]] = function()
-			I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\227\009\031(j\132V\"m\230\136\148\151\028\149U\149\159k\2486\141r\184bf\251", -336930859)] .. (llllIIIIIlIII1lll1Il1 and l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("j\188>S\223\009", -1330552478)] or l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("u_\017\175#F\019!\130", -255139435)]));
-			I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\"\226\027\186\196i\024b\023M\249\165\148l\179\139\227\011\196\151{%e\236Z?\222z\247r", -1644086270)] .. (IllI1II111l1lIII1IllI1 and l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\020H\233\138Z\181", -1016297767)] or l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("A\218y\026+\197i\027\224", -1421125994)]));
+		[bp85E[imm84C("\226e/\172+\130", -70453351)]] = function()
+			dx828();
+			imm66C(bp85E[imm84C("\177\181i\253\144\009\216\239\143\003\135bQ\01254\244c\153S\182Ak", -303899707)]);
 		end,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\242n^^\186\252:\201X\173s\254\244\251\132\176\218", -1923474764)]] = function()
-			local l1lIl1lll1l1I111IlI = lIIIIIl1Il11l1IlIII11();
-			if l1lIl1lll1l1I111IlI then
-				lll1I1lIIllIl1lI11Il11(l1lIl1lll1l1I111IlI);
-				llllIIIIIlIII1lll1Il1 = l1lIl1lll1l1I111IlI;
-				I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("t\210$S\156/\227Pt\012\001\134\187[\199 zYT}\197lUa\193\147\160\170", -201791503)]);
-			else
-				I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("p\166\241l\198F;V\"\229\133\191\024\022~Q\226\239P}`\193\241|\185\162||\156\209\232", -867329893)]);
-			end;
+		[bp85E[imm84C("\224(Vp\002\221", -495270667)]] = function()
+			bp624 = true;
+			(getgenv())[bp85E[imm84C("\208\143{&.\248\020\'n5Yh\215\'r", -1111917710)]] = nil;
+			imm66C(bp85E[imm84C("k\231P\1958\252jS\189", -197203843)]);
 		end,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\138\1581=\226\025\163\205\232\001\015\0257\129\184xo\159J", -955019737)]] = function()
-			local l1lIl1lll1l1I111IlI = III1I11I1Ill1lIlIIIIl();
-			if l1lIl1lll1l1I111IlI then
-				local IlIIl11l1lIIIl11l11ll1 = Il1II1IlIlI1I1IIlI1I(l1lIl1lll1l1I111IlI);
-				I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\018.\171\210\189b\163\003\139\199\031\144d\222D)_\133H\0183u~\224\246\243\178,\024", -1837226756)] .. (IlIIl11l1lIIIl11l11ll1 and l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("{\242t\253\149\177\220", -405286993)] or l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\161\194\144\247C\012", -1064468197)]));
-			else
-				I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1(")\153\139\214\190\231\024b\2374\165\189q\1411\1413M&\248\00681\195\228c>A-\138\'\167\225\175", -1114735844)]);
-			end;
+		[bp85E[imm84C("\005SI\030^J\161\205I\2516", -570967057)]] = function(bp58E)
+			rawset(imm6B7, bp58E, true);
+			imm66C(bp85E[imm84C("\024\149\175\'\029\151O\2044\027\201\002\024>\144\191\224", -2034299522)] .. tostring(bp58E));
 		end,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("9\134\208F\138\194", -1803081458)]] = function()
-			Illl1l1I1ll1IlI1lI1I1();
-			I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\254\'\148E\167\217D<\169U\226\172\183\158\154\250\255C\1403i\221\232", -1767756476)]);
+		[bp85E[imm84C("5\197\019\007\211\197\215\206\159z\004\211\189", -249830857)]] = function(bp58E)
+			rawset(imm6B7, bp58E, nil);
 		end,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\128<\029]\138\011", -1517335778)]] = function()
-			llII1I11II1Il111lIlIl1 = true;
-			(getgenv())[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\233C\1912D\143\2351\242\139]\236\2474U", -98503615)]] = nil;
-			I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("Q%2\021\213\163\234\149\137", -181147033)]);
+		[bp85E[imm84C("JG\132g\155 X\232\180\205", -2143289216)]] = function(bp58E)
+			rawset(op6ED, bp58E, true);
 		end,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\177\194\023L\009}$\192\242\255\216", -482752909)]] = function(l1lIl1lll1l1I111IlI)
-			rawset(IIl1IlIIl111l1lll1111, l1lIl1lll1l1I111IlI, true);
-			I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\222\022~8\156}xF\200\161k\246\171=\157\028.", -558449299)] .. tostring(l1lIl1lll1l1I111IlI));
-		end,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\203\171\214 \193\131B\174\028\171a\n\245", -1314561206)]] = function(l1lIl1lll1l1I111IlI)
-			rawset(IIl1IlIIl111l1lll1111, l1lIl1lll1l1I111IlI, nil);
-		end,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("8\127\197t,\202\177Q\210\246", -428356369)]] = function(l1lIl1lll1l1I111IlI)
-			rawset(lIl1Il1I111I1IlllllI, l1lIl1lll1l1I111IlI, true);
-		end,
-		[l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("[a.yJ\242\179\025We", -2052060320)]] = function(l1lIl1lll1l1I111IlI, I11IIllIl11lIIII1llIl1)
-			rawset(l1l11lII11lllllII1l111, l1lIl1lll1l1I111IlI:lower(), I11IIllIl11lIIII1llIl1 or true);
+		[bp85E[imm84C("!\127\"\190p8iP\012A", -1288018316)]] = function(bp58E, cx591)
+			rawset(bp67E, bp58E:lower(), cx591 or true);
 		end,
 	};
-l1I1llI11I11Ill111IlI1();
-I1IIllIIIIII11llIIII(l1I1l1IIl11lllI1l1ll1[lIIlI1Il1l1IIlI1111ll1("\154n3@3:\133\236`\213\019\164v&\173+\220LMc\212\242", -615991663)]);
+sp83A();
+imm66C(bp85E[imm84C("$\009\199\241\"9\128\214o\248h\197x\183\140W\142\160\"\024\176\206", -673206337)]);
 end)(...)
