@@ -10,7 +10,7 @@ local weaponNames = {
 }
 local weaponPatches = {
     Lifesteal = 99999,
-    Spread = 0
+    Spread = 0,
     BaseDamage = 150,
     ChargingTime = 0,
     BulletSpeed = 90000,
