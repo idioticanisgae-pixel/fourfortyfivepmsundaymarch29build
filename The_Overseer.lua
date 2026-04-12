@@ -8636,5 +8636,917 @@ function Modules.OverseerCE:_RescanDestroyed()
         "warning"
     )
 end
+Modules.OverseerCE.State.RemoteSpy = {
+    Active      = false,
+    Logs        = {},
+    MaxLogs     = 500,
+    Hooks       = {},
+    HookedSet   = {},
+    PauseLog    = false,
+    FilterText  = "",
+    LogScroll   = nil,
+    CountLabel  = nil,
+}
+Modules.OverseerCE.State.ConView = {
+    LastInstance = nil,
+    Connections  = {},
+}
+local function _prettyArg(v, depth)
+    depth = depth or 0
+    if depth > 2 then return "..." end
+    local t = type(v)
+    if t == "nil"     then return "nil"
+    elseif t == "boolean" or t == "number" then return tostring(v)
+    elseif t == "string"  then
+        local s = v:sub(1, 80)
+        if #v > 80 then s = s .. "…" end
+        return '"' .. s .. '"'
+    elseif t == "function" then
+        return "fn@" .. tostring(v):sub(-6)
+    elseif t == "table"   then
+        local parts, n = {}, 0
+        for k, val in pairs(v) do
+            n += 1
+            if n > 5 then table.insert(parts, "…"); break end
+            table.insert(parts, tostring(k).."=".. _prettyArg(val, depth+1))
+        end
+        return "{" .. table.concat(parts, ", ") .. "}"
+    else
+        local ok, str = pcall(tostring, v)
+        return ok and str or "?"
+    end
+end
+local function _fmtArgs(args)
+    if #args == 0 then return "()" end
+    local parts = {}
+    for _, v in ipairs(args) do
+        table.insert(parts, _prettyArg(v))
+    end
+    return "( " .. table.concat(parts, ",  ") .. " )"
+end
+function Modules.OverseerCE:_RemSpyPush(entry)
+    local spy = self.State.RemoteSpy
+    if spy.PauseLog then return end
+    if spy.FilterText ~= "" then
+        local lower = entry.Name:lower()
+        if not lower:find(spy.FilterText:lower(), 1, true) then return end
+    end
+    table.insert(spy.Logs, entry)
+    if #spy.Logs > spy.MaxLogs then
+        table.remove(spy.Logs, 1)
+    end
+    if spy.LogScroll and spy.LogScroll.Parent then
+        self:_RemSpyAddRow(spy.LogScroll, entry)
+        spy.LogScroll.CanvasPosition = Vector2.new(0, math.huge)
+    end
+    if spy.CountLabel and spy.CountLabel.Parent then
+        spy.CountLabel.Text = "Logged: " .. #spy.Logs
+    end
+end
+function Modules.OverseerCE:_RemSpyHookRemote(inst)
+    local spy = self.State.RemoteSpy
+    if spy.HookedSet[inst] then return end
+    if not hookfunction then return end
+    local hookData = { Remote = inst }
+    if inst:IsA("RemoteEvent") then
+        local ok, orig = pcall(function()
+            return hookfunction(
+                inst.FireServer,
+                newcclosure and newcclosure(function(self_arg, ...)
+                    local args = {...}
+                    Modules.OverseerCE:_RemSpyPush({
+                        Time    = os.date("%H:%M:%S"),
+                        Tick    = tick(),
+                        Kind    = "Event",
+                        Name    = inst.Name,
+                        Path    = (function()
+                            local ok2, fn = pcall(function() return inst:GetFullName() end)
+                            return ok2 and fn or inst.Name
+                        end)(),
+                        Args    = args,
+                        ArgsStr = _fmtArgs(args),
+                        Remote  = inst,
+                    })
+                    return orig(self_arg, ...)
+                end) or function(self_arg, ...)
+                    local args = {...}
+                    Modules.OverseerCE:_RemSpyPush({
+                        Time    = os.date("%H:%M:%S"),
+                        Tick    = tick(),
+                        Kind    = "Event",
+                        Name    = inst.Name,
+                        Path    = (function()
+                            local ok2, fn = pcall(function() return inst:GetFullName() end)
+                            return ok2 and fn or inst.Name
+                        end)(),
+                        Args    = args,
+                        ArgsStr = _fmtArgs(args),
+                        Remote  = inst,
+                    })
+                    return orig(self_arg, ...)
+                end
+            )
+        end)
+        if ok then
+            hookData.OrigFire = orig
+        end
+    elseif inst:IsA("RemoteFunction") then
+        local ok, orig = pcall(function()
+            return hookfunction(
+                inst.InvokeServer,
+                newcclosure and newcclosure(function(self_arg, ...)
+                    local args = {...}
+                    local entry = {
+                        Time    = os.date("%H:%M:%S"),
+                        Tick    = tick(),
+                        Kind    = "Function",
+                        Name    = inst.Name,
+                        Path    = (function()
+                            local ok2, fn = pcall(function() return inst:GetFullName() end)
+                            return ok2 and fn or inst.Name
+                        end)(),
+                        Args    = args,
+                        ArgsStr = _fmtArgs(args),
+                        Remote  = inst,
+                        RetStr  = "...",
+                    }
+                    Modules.OverseerCE:_RemSpyPush(entry)
+                    local results = { orig(self_arg, ...) }
+                    entry.RetStr = _fmtArgs(results)
+                    if entry._retLabel and entry._retLabel.Parent then
+                        entry._retLabel.Text = "↩ " .. entry.RetStr
+                    end
+                    return table.unpack(results)
+                end) or function(self_arg, ...)
+                    local args = {...}
+                    local entry = {
+                        Time    = os.date("%H:%M:%S"),
+                        Tick    = tick(),
+                        Kind    = "Function",
+                        Name    = inst.Name,
+                        Path    = (function()
+                            local ok2, fn = pcall(function() return inst:GetFullName() end)
+                            return ok2 and fn or inst.Name
+                        end)(),
+                        Args    = args,
+                        ArgsStr = _fmtArgs(args),
+                        Remote  = inst,
+                        RetStr  = "...",
+                    }
+                    Modules.OverseerCE:_RemSpyPush(entry)
+                    local results = { orig(self_arg, ...) }
+                    entry.RetStr = _fmtArgs(results)
+                    if entry._retLabel and entry._retLabel.Parent then
+                        entry._retLabel.Text = "↩ " .. entry.RetStr
+                    end
+                    return table.unpack(results)
+                end
+            )
+        end)
+        if ok then
+            hookData.OrigInvoke = orig
+        end
+    end
+    spy.HookedSet[inst] = true
+    table.insert(spy.Hooks, hookData)
+end
+function Modules.OverseerCE:RemSpyScanAndHook()
+    for _, inst in ipairs(game:GetDescendants()) do
+        if inst:IsA("RemoteEvent") or inst:IsA("RemoteFunction") then
+            self:_RemSpyHookRemote(inst)
+        end
+    end
+    if getnilinstances then
+        for _, inst in ipairs(getnilinstances()) do
+            if inst:IsA("RemoteEvent") or inst:IsA("RemoteFunction") then
+                self:_RemSpyHookRemote(inst)
+            end
+        end
+    end
+    if not self.State.RemoteSpy._DescConn then
+        self.State.RemoteSpy._DescConn = game.DescendantAdded:Connect(function(inst)
+            if self.State.RemoteSpy.Active then
+                if inst:IsA("RemoteEvent") or inst:IsA("RemoteFunction") then
+                    self:_RemSpyHookRemote(inst)
+                end
+            end
+        end)
+    end
+end
+function Modules.OverseerCE:RemSpyStop()
+    local spy = self.State.RemoteSpy
+    spy.Active = false
+    if hookfunction then
+        for _, hookData in ipairs(spy.Hooks) do
+            local inst = hookData.Remote
+            if inst and inst.Parent then
+                if hookData.OrigFire then
+                    pcall(hookfunction, inst.FireServer, hookData.OrigFire)
+                end
+                if hookData.OrigInvoke then
+                    pcall(hookfunction, inst.InvokeServer, hookData.OrigInvoke)
+                end
+            end
+        end
+    end
+    spy.Hooks    = {}
+    spy.HookedSet = {}
+    if spy._DescConn then
+        spy._DescConn:Disconnect()
+        spy._DescConn = nil
+    end
+end
+function Modules.OverseerCE:_RemSpyAddRow(scroll, entry)
+    local C   = self.Config
+    local ROW = 38
+    local row = Instance.new("Frame", scroll)
+    row.Size             = UDim2.new(1, -2, 0, ROW)
+    row.BackgroundColor3 = entry.Kind == "Function"
+        and Color3.fromRGB(230, 220, 255)
+        or  Color3.fromRGB(220, 235, 255)
+    row.BorderSizePixel  = 0
+    self:_createBorder(row, true)
+    local badge = Instance.new("Frame", row)
+    badge.Size             = UDim2.fromOffset(14, ROW)
+    badge.Position         = UDim2.fromOffset(0, 0)
+    badge.BackgroundColor3 = entry.Kind == "Function"
+        and Color3.fromRGB(138, 43, 226)
+        or  Color3.fromRGB(0, 120, 215)
+    badge.BorderSizePixel  = 0
+    local timeL = Instance.new("TextLabel", row)
+    timeL.Size             = UDim2.fromOffset(54, 14)
+    timeL.Position         = UDim2.fromOffset(18, 2)
+    timeL.BackgroundTransparency = 1
+    timeL.Text             = entry.Time
+    timeL.TextColor3       = C.TEXT_GRAY
+    timeL.Font             = Enum.Font.Code
+    timeL.TextSize         = 9
+    timeL.TextXAlignment   = Enum.TextXAlignment.Left
+    local kindL = Instance.new("TextLabel", row)
+    kindL.Size             = UDim2.fromOffset(60, 14)
+    kindL.Position         = UDim2.fromOffset(74, 2)
+    kindL.BackgroundTransparency = 1
+    kindL.Text             = "[" .. entry.Kind .. "]"
+    kindL.TextColor3       = entry.Kind == "Function"
+        and Color3.fromRGB(138, 43, 226)
+        or  Color3.fromRGB(0, 80, 180)
+    kindL.Font             = Enum.Font.SourceSansBold
+    kindL.TextSize         = 9
+    kindL.TextXAlignment   = Enum.TextXAlignment.Left
+    local nameL = Instance.new("TextLabel", row)
+    nameL.Size             = UDim2.new(1, -200, 0, 14)
+    nameL.Position         = UDim2.fromOffset(136, 2)
+    nameL.BackgroundTransparency = 1
+    nameL.Text             = entry.Path
+    nameL.TextColor3       = C.TEXT_BLACK
+    nameL.Font             = Enum.Font.SourceSansBold
+    nameL.TextSize         = 10
+    nameL.TextXAlignment   = Enum.TextXAlignment.Left
+    nameL.TextTruncate     = Enum.TextTruncate.AtEnd
+    local argsL = Instance.new("TextLabel", row)
+    argsL.Size             = UDim2.new(1, -80, 0, 13)
+    argsL.Position         = UDim2.fromOffset(18, 17)
+    argsL.BackgroundTransparency = 1
+    argsL.Text             = "→ " .. entry.ArgsStr
+    argsL.TextColor3       = Color3.fromRGB(40, 40, 40)
+    argsL.Font             = Enum.Font.Code
+    argsL.TextSize         = 9
+    argsL.TextXAlignment   = Enum.TextXAlignment.Left
+    argsL.TextTruncate     = Enum.TextTruncate.AtEnd
+    local retL = Instance.new("TextLabel", row)
+    retL.Size              = UDim2.new(1, -80, 0, 13)
+    retL.Position          = UDim2.fromOffset(18, 25)
+    retL.BackgroundTransparency = 1
+    retL.Text              = entry.Kind == "Function" and ("↩ " .. (entry.RetStr or "...")) or ""
+    retL.TextColor3        = Color3.fromRGB(0, 120, 60)
+    retL.Font              = Enum.Font.Code
+    retL.TextSize          = 9
+    retL.TextXAlignment    = Enum.TextXAlignment.Left
+    retL.TextTruncate      = Enum.TextTruncate.AtEnd
+    entry._retLabel        = retL
+    local cpBtn = self:_createButton(row, "Copy Path", UDim2.fromOffset(68, 16), UDim2.new(1, -72, 0, 2), function()
+        self:_setClipboard(entry.Path)
+        self:_showNotification("Copied: " .. entry.Path, "success")
+    end)
+    cpBtn.TextSize = 8
+    local caBtn = self:_createButton(row, "Copy Args", UDim2.fromOffset(68, 16), UDim2.new(1, -72, 0, 20), function()
+        self:_setClipboard(entry.ArgsStr)
+        self:_showNotification("Args copied!", "success")
+    end)
+    caBtn.TextSize = 8
+    return row
+end
+function Modules.OverseerCE:CreateRemoteSpyUI(parent)
+    local C   = self.Config
+    local spy = self.State.RemoteSpy
+    local toolbar = Instance.new("Frame", parent)
+    toolbar.Size             = UDim2.new(1, 0, 0, 28)
+    toolbar.Position         = UDim2.fromOffset(0, 0)
+    toolbar.BackgroundColor3 = C.BG_DARK
+    toolbar.BorderSizePixel  = 0
+    self:_createBorder(toolbar, true)
+    local statusLabel = Instance.new("TextLabel", toolbar)
+    statusLabel.Size             = UDim2.fromOffset(80, 24)
+    statusLabel.Position         = UDim2.fromOffset(4, 2)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text             = "● INACTIVE"
+    statusLabel.TextColor3       = Color3.fromRGB(180, 0, 0)
+    statusLabel.Font             = Enum.Font.SourceSansBold
+    statusLabel.TextSize         = 11
+    statusLabel.TextXAlignment   = Enum.TextXAlignment.Left
+    local countLabel = Instance.new("TextLabel", toolbar)
+    countLabel.Size              = UDim2.fromOffset(90, 24)
+    countLabel.Position          = UDim2.fromOffset(86, 2)
+    countLabel.BackgroundTransparency = 1
+    countLabel.Text              = "Logged: " .. #spy.Logs
+    countLabel.TextColor3        = C.TEXT_GRAY
+    countLabel.Font              = Enum.Font.SourceSans
+    countLabel.TextSize          = 10
+    countLabel.TextXAlignment    = Enum.TextXAlignment.Left
+    spy.CountLabel = countLabel
+    local filterBox = Instance.new("TextBox", toolbar)
+    filterBox.Size              = UDim2.fromOffset(150, 20)
+    filterBox.Position          = UDim2.fromOffset(180, 4)
+    filterBox.BackgroundColor3  = C.BG_WHITE
+    filterBox.Text              = ""
+    filterBox.PlaceholderText   = "Filter by name..."
+    filterBox.TextColor3        = C.TEXT_BLACK
+    filterBox.Font              = Enum.Font.SourceSans
+    filterBox.TextSize          = 10
+    filterBox.TextXAlignment    = Enum.TextXAlignment.Left
+    filterBox.ClearTextOnFocus  = false
+    filterBox.BorderSizePixel   = 0
+    self:_createBorder(filterBox, true)
+    local fp = Instance.new("UIPadding", filterBox)
+    fp.PaddingLeft = UDim.new(0, 4)
+    filterBox:GetPropertyChangedSignal("Text"):Connect(function()
+        spy.FilterText = filterBox.Text
+    end)
+    local toggleBtn = self:_createButton(toolbar, "Start", UDim2.fromOffset(60, 20), UDim2.fromOffset(336, 4), function() end)
+    toggleBtn.TextSize = 10
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(180, 230, 180)
+    local pauseBtn = self:_createButton(toolbar, "Pause", UDim2.fromOffset(50, 20), UDim2.fromOffset(400, 4), function()
+        spy.PauseLog = not spy.PauseLog
+        pauseBtn.Text = spy.PauseLog and "Resume" or "Pause"
+        pauseBtn.BackgroundColor3 = spy.PauseLog
+            and Color3.fromRGB(255, 220, 150)
+            or  C.BG_LIGHT
+    end)
+    pauseBtn.TextSize = 10
+    local clearBtn = self:_createButton(toolbar, "Clear", UDim2.fromOffset(50, 20), UDim2.fromOffset(454, 4), function()
+        spy.Logs = {}
+        if spy.LogScroll and spy.LogScroll.Parent then
+            for _, c in ipairs(spy.LogScroll:GetChildren()) do
+                if not c:IsA("UIListLayout") then c:Destroy() end
+            end
+        end
+        countLabel.Text = "Logged: 0"
+        self:_showNotification("Log cleared", "info")
+    end)
+    clearBtn.TextSize = 10
+    local copyAllBtn = self:_createButton(toolbar, "Copy All", UDim2.fromOffset(60, 20), UDim2.fromOffset(508, 4), function()
+        if #spy.Logs == 0 then
+            self:_showNotification("No logs to copy", "warning")
+            return
+        end
+        local lines = {}
+        for _, e in ipairs(spy.Logs) do
+            table.insert(lines, string.format("[%s] [%s] %s %s", e.Time, e.Kind, e.Path, e.ArgsStr))
+            if e.Kind == "Function" and e.RetStr then
+                table.insert(lines, "    ↩ " .. e.RetStr)
+            end
+        end
+        self:_setClipboard(table.concat(lines, "\n"))
+        self:_showNotification("All logs copied!", "success")
+    end)
+    copyAllBtn.TextSize = 10
+    local hookedLabel = Instance.new("TextLabel", toolbar)
+    hookedLabel.Size             = UDim2.fromOffset(100, 24)
+    hookedLabel.Position         = UDim2.fromOffset(572, 2)
+    hookedLabel.BackgroundTransparency = 1
+    hookedLabel.Text             = "Hooked: 0"
+    hookedLabel.TextColor3       = C.TEXT_GRAY
+    hookedLabel.Font             = Enum.Font.SourceSans
+    hookedLabel.TextSize         = 10
+    hookedLabel.TextXAlignment   = Enum.TextXAlignment.Left
+    local logScroll = Instance.new("ScrollingFrame", parent)
+    logScroll.Size                = UDim2.new(1, -4, 1, -34)
+    logScroll.Position            = UDim2.fromOffset(2, 30)
+    logScroll.BackgroundColor3    = C.BG_WHITE
+    logScroll.BorderSizePixel     = 0
+    logScroll.ScrollBarThickness  = 10
+    logScroll.ScrollBarImageColor3 = C.BG_DARK
+    logScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    logScroll.CanvasSize          = UDim2.new(0, 0, 0, 0)
+    self:_createBorder(logScroll, true)
+    local listLayout = Instance.new("UIListLayout", logScroll)
+    listLayout.Padding   = UDim.new(0, 1)
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    spy.LogScroll = logScroll
+    for _, entry in ipairs(spy.Logs) do
+        self:_RemSpyAddRow(logScroll, entry)
+    end
+    logScroll.CanvasPosition = Vector2.new(0, math.huge)
+    toggleBtn.MouseButton1Click:Connect(function()
+        if not spy.Active then
+            if not hookfunction then
+                self:_showNotification("hookfunction not available on this executor", "error")
+                return
+            end
+            spy.Active = true
+            statusLabel.Text      = "● ACTIVE"
+            statusLabel.TextColor3 = Color3.fromRGB(0, 160, 0)
+            toggleBtn.Text        = "Stop"
+            toggleBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 200)
+            self:RemSpyScanAndHook()
+            hookedLabel.Text = "Hooked: " .. #spy.Hooks
+            self:_showNotification("Remote Spy active — " .. #spy.Hooks .. " remotes hooked", "success")
+        else
+            self:RemSpyStop()
+            statusLabel.Text      = "● INACTIVE"
+            statusLabel.TextColor3 = Color3.fromRGB(180, 0, 0)
+            toggleBtn.Text        = "Start"
+            toggleBtn.BackgroundColor3 = Color3.fromRGB(180, 230, 180)
+            hookedLabel.Text = "Hooked: 0"
+            self:_showNotification("Remote Spy stopped", "warning")
+        end
+    end)
+    task.spawn(function()
+        while logScroll.Parent do
+            hookedLabel.Text = "Hooked: " .. #spy.Hooks
+            task.wait(2)
+        end
+    end)
+end
+function Modules.OverseerCE:GetConnectionsForInstance(inst)
+    if not inst then return {}, "No instance provided" end
+    if not getconnections then return {}, "getconnections() not available on this executor" end
+    local results = {}
+    local signalNames = {
+        "AncestryChanged", "ChildAdded", "ChildRemoved",
+        "DescendantAdded", "DescendantRemoving",
+        "AttributeChanged", "Changed",
+        "MouseButton1Click", "MouseButton1Down", "MouseButton1Up",
+        "MouseButton2Click", "MouseButton2Down", "MouseButton2Up",
+        "MouseEnter", "MouseLeave", "MouseMoved", "MouseWheelForward", "MouseWheelBackward",
+        "InputBegan", "InputChanged", "InputEnded",
+        "Focused", "FocusLost",
+        "SelectionGained", "SelectionLost",
+        "OnClientEvent", "OnServerEvent", "OnClientInvoke", "OnServerInvoke",
+        "Touched", "TouchEnded", "Hit",
+        "CharacterAdded", "CharacterRemoving", "CharacterAppearanceLoaded",
+        "Heartbeat", "Stepped", "RenderStepped",
+        "PlayerAdded", "PlayerRemoving",
+        "StreamingEnabled",
+        "Fired", "Completed", "Triggered",
+    }
+    local seen = {}
+    for _, sigName in ipairs(signalNames) do
+        if not seen[sigName] then
+            seen[sigName] = true
+            local ok, sig = pcall(function() return inst[sigName] end)
+            if ok and sig and type(sig) ~= "function" then
+                local cok, conns = pcall(getconnections, sig)
+                if cok and type(conns) == "table" then
+                    for _, conn in ipairs(conns) do
+                        local entry = {
+                            Signal   = sigName,
+                            Conn     = conn,
+                            Enabled  = conn.Enabled,
+                            FuncStr  = "",
+                            Source   = "",
+                            Line     = -1,
+                        }
+                        local fn = nil
+                        pcall(function() fn = conn.Function end)
+                        if fn and type(fn) == "function" then
+                            entry.FuncStr = tostring(fn)
+                            if debug and debug.getinfo then
+                                local iok, info = pcall(debug.getinfo, fn)
+                                if iok and info then
+                                    entry.Source = info.short_src or info.source or "?"
+                                    entry.Line   = info.linedefined or -1
+                                end
+                            end
+                        end
+                        table.insert(results, entry)
+                    end
+                end
+            end
+        end
+    end
+    return results, nil
+end
+function Modules.OverseerCE:CreateConnectionViewerUI(parent)
+    local C = self.Config
+    local topBar = Instance.new("Frame", parent)
+    topBar.Size             = UDim2.new(1, 0, 0, 28)
+    topBar.Position         = UDim2.fromOffset(0, 0)
+    topBar.BackgroundColor3 = C.BG_DARK
+    topBar.BorderSizePixel  = 0
+    self:_createBorder(topBar, true)
+    local pathBox = Instance.new("TextBox", topBar)
+    pathBox.Size             = UDim2.new(1, -220, 0, 20)
+    pathBox.Position         = UDim2.fromOffset(4, 4)
+    pathBox.BackgroundColor3 = C.BG_WHITE
+    pathBox.Text             = ""
+    pathBox.PlaceholderText  = "Instance path  e.g.  RS.MyFolder.MyPart  or  workspace.Baseplate"
+    pathBox.TextColor3       = C.TEXT_BLACK
+    pathBox.Font             = Enum.Font.Code
+    pathBox.TextSize         = 10
+    pathBox.TextXAlignment   = Enum.TextXAlignment.Left
+    pathBox.ClearTextOnFocus = false
+    pathBox.BorderSizePixel  = 0
+    self:_createBorder(pathBox, true)
+    local pp = Instance.new("UIPadding", pathBox)
+    pp.PaddingLeft = UDim.new(0, 4)
+    local countLabel = Instance.new("TextLabel", topBar)
+    countLabel.Size             = UDim2.fromOffset(80, 20)
+    countLabel.Position         = UDim2.new(1, -216, 0, 4)
+    countLabel.BackgroundTransparency = 1
+    countLabel.Text             = "Conns: 0"
+    countLabel.TextColor3       = C.TEXT_GRAY
+    countLabel.Font             = Enum.Font.SourceSans
+    countLabel.TextSize         = 10
+    countLabel.TextXAlignment   = Enum.TextXAlignment.Left
+    local scanBtn = self:_createButton(topBar, "Scan", UDim2.fromOffset(55, 20), UDim2.new(1, -132, 0, 4), function() end)
+    scanBtn.TextSize = 10
+    local useSelBtn = self:_createButton(topBar, "Use Selected", UDim2.fromOffset(80, 20), UDim2.new(1, -72, 0, 4), function()
+        if self.State.SelectedModule then
+            pathBox.Text = self.State.SelectedModule:GetFullName()
+        else
+            self:_showNotification("No module selected in Module List", "warning")
+        end
+    end)
+    useSelBtn.TextSize = 9
+    local headers = Instance.new("Frame", parent)
+    headers.Size             = UDim2.new(1, -4, 0, 18)
+    headers.Position         = UDim2.fromOffset(2, 30)
+    headers.BackgroundColor3 = C.BG_DARK
+    headers.BorderSizePixel  = 0
+    local function hdrLabel(txt, xOff, w)
+        local l = Instance.new("TextLabel", headers)
+        l.Size             = UDim2.fromOffset(w, 18)
+        l.Position         = UDim2.fromOffset(xOff, 0)
+        l.BackgroundTransparency = 1
+        l.Text             = txt
+        l.TextColor3       = C.BG_WHITE
+        l.Font             = Enum.Font.SourceSansBold
+        l.TextSize         = 9
+        l.TextXAlignment   = Enum.TextXAlignment.Left
+        local lp = Instance.new("UIPadding", l)
+        lp.PaddingLeft = UDim.new(0, 3)
+    end
+    hdrLabel("Signal",   0,   120)
+    hdrLabel("State",    122,  50)
+    hdrLabel("Function", 174, 140)
+    hdrLabel("Source",   316, 160)
+    hdrLabel("Line",     478,  40)
+    hdrLabel("Actions",  520,  80)
+    local scroll = Instance.new("ScrollingFrame", parent)
+    scroll.Size                = UDim2.new(1, -4, 1, -54)
+    scroll.Position            = UDim2.fromOffset(2, 50)
+    scroll.BackgroundColor3    = C.BG_WHITE
+    scroll.BorderSizePixel     = 0
+    scroll.ScrollBarThickness  = 10
+    scroll.ScrollBarImageColor3 = C.BG_DARK
+    scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    scroll.CanvasSize          = UDim2.new(0, 0, 0, 0)
+    self:_createBorder(scroll, true)
+    Instance.new("UIListLayout", scroll).Padding = UDim.new(0, 1)
+    local function populateConns(conns)
+        for _, c in ipairs(scroll:GetChildren()) do
+            if not c:IsA("UIListLayout") then c:Destroy() end
+        end
+        if #conns == 0 then
+            local empty = Instance.new("TextLabel", scroll)
+            empty.Size             = UDim2.new(1, 0, 0, 30)
+            empty.BackgroundTransparency = 1
+            empty.Text             = "No connections found (or getconnections() unavailable)"
+            empty.TextColor3       = C.TEXT_GRAY
+            empty.Font             = Enum.Font.SourceSansItalic
+            empty.TextSize         = 11
+            empty.TextXAlignment   = Enum.TextXAlignment.Center
+            return
+        end
+        countLabel.Text = "Conns: " .. #conns
+        for i, entry in ipairs(conns) do
+            local ROW = 22
+            local row = Instance.new("Frame", scroll)
+            row.Size             = UDim2.new(1, -2, 0, ROW)
+            row.BackgroundColor3 = i % 2 == 0 and C.BG_WHITE or C.BG_LIGHT
+            row.BorderSizePixel  = 0
+            self:_createBorder(row, true)
+            local sigL = Instance.new("TextLabel", row)
+            sigL.Size             = UDim2.fromOffset(118, ROW)
+            sigL.Position         = UDim2.fromOffset(2, 0)
+            sigL.BackgroundTransparency = 1
+            sigL.Text             = entry.Signal
+            sigL.TextColor3       = Color3.fromRGB(0, 80, 180)
+            sigL.Font             = Enum.Font.SourceSansBold
+            sigL.TextSize         = 10
+            sigL.TextXAlignment   = Enum.TextXAlignment.Left
+            sigL.TextTruncate     = Enum.TextTruncate.AtEnd
+            local slp = Instance.new("UIPadding", sigL); slp.PaddingLeft = UDim.new(0,3)
+            local stateL = Instance.new("TextLabel", row)
+            stateL.Size             = UDim2.fromOffset(48, ROW)
+            stateL.Position         = UDim2.fromOffset(122, 0)
+            stateL.BackgroundTransparency = 1
+            stateL.Text             = entry.Enabled and "ON" or "OFF"
+            stateL.TextColor3       = entry.Enabled
+                and Color3.fromRGB(0, 150, 0)
+                or  Color3.fromRGB(180, 0, 0)
+            stateL.Font             = Enum.Font.SourceSansBold
+            stateL.TextSize         = 10
+            stateL.TextXAlignment   = Enum.TextXAlignment.Left
+            local fnL = Instance.new("TextLabel", row)
+            fnL.Size              = UDim2.fromOffset(138, ROW)
+            fnL.Position          = UDim2.fromOffset(172, 0)
+            fnL.BackgroundTransparency = 1
+            fnL.Text              = entry.FuncStr ~= "" and entry.FuncStr:sub(-16) or "N/A"
+            fnL.TextColor3        = C.TEXT_BLACK
+            fnL.Font              = Enum.Font.Code
+            fnL.TextSize          = 9
+            fnL.TextXAlignment    = Enum.TextXAlignment.Left
+            fnL.TextTruncate      = Enum.TextTruncate.AtEnd
+            local srcL = Instance.new("TextLabel", row)
+            srcL.Size             = UDim2.fromOffset(158, ROW)
+            srcL.Position         = UDim2.fromOffset(312, 0)
+            srcL.BackgroundTransparency = 1
+            srcL.Text             = entry.Source ~= "" and entry.Source or "?"
+            srcL.TextColor3       = C.TEXT_GRAY
+            srcL.Font             = Enum.Font.Code
+            srcL.TextSize         = 9
+            srcL.TextXAlignment   = Enum.TextXAlignment.Left
+            srcL.TextTruncate     = Enum.TextTruncate.AtEnd
+            local lineL = Instance.new("TextLabel", row)
+            lineL.Size            = UDim2.fromOffset(38, ROW)
+            lineL.Position        = UDim2.fromOffset(472, 0)
+            lineL.BackgroundTransparency = 1
+            lineL.Text            = entry.Line > 0 and tostring(entry.Line) or "-"
+            lineL.TextColor3      = C.TEXT_GRAY
+            lineL.Font            = Enum.Font.Code
+            lineL.TextSize        = 9
+            lineL.TextXAlignment  = Enum.TextXAlignment.Center
+            local discBtn = self:_createButton(row, "Disc", UDim2.fromOffset(38, 16), UDim2.fromOffset(512, 3), function()
+                local ok, err = pcall(function() entry.Conn:Disconnect() end)
+                if ok then
+                    row.BackgroundColor3 = Color3.fromRGB(255, 200, 200)
+                    stateL.Text          = "DISC"
+                    stateL.TextColor3    = Color3.fromRGB(130, 130, 130)
+                    self:_showNotification("Disconnected: " .. entry.Signal, "warning")
+                else
+                    self:_showNotification("Disconnect failed: " .. tostring(err), "error")
+                end
+            end)
+            discBtn.TextSize = 8
+            discBtn.BackgroundColor3 = Color3.fromRGB(255, 210, 210)
+            local cpFnBtn = self:_createButton(row, "Copy Fn", UDim2.fromOffset(48, 16), UDim2.fromOffset(554, 3), function()
+                if entry.FuncStr ~= "" then
+                    self:_setClipboard(entry.FuncStr)
+                    self:_showNotification("Function ref copied!", "success")
+                else
+                    self:_showNotification("No function reference available", "warning")
+                end
+            end)
+            cpFnBtn.TextSize = 8
+            if entry.Source ~= "" or entry.Line > 0 then
+                local tip = string.format("%s  L%d", entry.Source, entry.Line)
+                row.MouseEnter:Connect(function()
+                    row.BackgroundColor3 = Color3.fromRGB(210, 230, 255)
+                    srcL.Text = tip
+                end)
+                row.MouseLeave:Connect(function()
+                    row.BackgroundColor3 = i % 2 == 0 and C.BG_WHITE or C.BG_LIGHT
+                    srcL.Text = entry.Source ~= "" and entry.Source or "?"
+                end)
+            end
+        end
+    end
+    scanBtn.MouseButton1Click:Connect(function()
+        local rawPath = pathBox.Text
+        if rawPath == "" then
+            self:_showNotification("Enter an instance path first", "warning")
+            return
+        end
+        local inst = nil
+        if Modules.NetCommander then
+            inst = Modules.NetCommander:_resolvePath(rawPath)
+        else
+            local ok, result = pcall(function()
+                local cur = game
+                for seg in rawPath:gmatch("[^%.]+") do
+                    cur = cur:FindFirstChild(seg) or cur[seg]
+                    if not cur then break end
+                end
+                return cur
+            end)
+            inst = ok and result or nil
+        end
+        if not inst then
+            self:_showNotification("Instance not found: " .. rawPath, "error")
+            return
+        end
+        if not getconnections then
+            self:_showNotification("getconnections() not available on this executor", "error")
+            return
+        end
+        self.State.ConView.LastInstance = inst
+        local conns, err = self:GetConnectionsForInstance(inst)
+        if err and #conns == 0 then
+            self:_showNotification(err, "error")
+            return
+        end
+        self.State.ConView.Connections = conns
+        populateConns(conns)
+        local typeName = typeof and typeof(inst) or type(inst)
+        self:_showNotification(
+            string.format("Found %d connection(s) on %s [%s]", #conns, inst.Name, typeName),
+            #conns > 0 and "success" or "info"
+        )
+    end)
+end
+local _originalOpenToolWindow = Modules.OverseerCE.OpenToolWindow
+function Modules.OverseerCE:OpenToolWindow(toolName)
+    if toolName == "Rem Spy" then
+        if self.State.UI and self.State.UI.ScreenGui then
+            for _, child in ipairs(self.State.UI.ScreenGui:GetChildren()) do
+                if child.Name:match("Window$") and child ~= self.State.UI.Main then
+                    child:Destroy()
+                end
+            end
+        end
+        local popup = Instance.new("Frame", self.State.UI.ScreenGui)
+        popup.Name            = "Rem SpyWindow"
+        popup.Size            = UDim2.fromOffset(720, 480)
+        popup.Position        = UDim2.new(0.5, -360, 0.5, -240)
+        popup.BackgroundColor3 = self.Config.BG_PANEL
+        popup.BorderSizePixel  = 0
+        popup.ZIndex           = 100
+        self:_createBorder(popup, false)
+        local titleBar = Instance.new("Frame", popup)
+        titleBar.Size             = UDim2.new(1, -2, 0, 24)
+        titleBar.Position         = UDim2.fromOffset(1, 1)
+        titleBar.BackgroundColor3 = self.Config.ACCENT_BLUE
+        titleBar.BorderSizePixel  = 0
+        titleBar.ZIndex           = 101
+        local grad = Instance.new("UIGradient", titleBar)
+        grad.Color    = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 80, 160)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 160, 220)),
+        }
+        grad.Rotation = 90
+        local titleL = Instance.new("TextLabel", titleBar)
+        titleL.Size             = UDim2.new(1, -50, 1, 0)
+        titleL.Position         = UDim2.fromOffset(4, 0)
+        titleL.Text             = "Remote Spy  —  passive FireServer / InvokeServer logger"
+        titleL.TextColor3       = self.Config.BG_WHITE
+        titleL.Font             = Enum.Font.SourceSansBold
+        titleL.TextSize         = 12
+        titleL.TextXAlignment   = Enum.TextXAlignment.Left
+        titleL.BackgroundTransparency = 1
+        titleL.ZIndex           = 102
+        local closeBtn = self:_createButton(titleBar, "×", UDim2.fromOffset(20, 20), UDim2.new(1, -22, 0, 2), function()
+            popup:Destroy()
+        end)
+        closeBtn.ZIndex    = 103
+        closeBtn.TextSize  = 16
+        closeBtn.Font      = Enum.Font.SourceSansBold
+        closeBtn.BackgroundColor3 = self.Config.BG_LIGHT
+        local contentArea = Instance.new("Frame", popup)
+        contentArea.Size             = UDim2.new(1, -8, 1, -32)
+        contentArea.Position         = UDim2.fromOffset(4, 28)
+        contentArea.BackgroundColor3 = self.Config.BG_PANEL
+        contentArea.BorderSizePixel  = 0
+        contentArea.ZIndex           = 100
+        self:CreateRemoteSpyUI(contentArea)
+        local dragging, dragStart, startPos
+        titleBar.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true; dragStart = input.Position; startPos = popup.Position
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local d = input.Position - dragStart
+                popup.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+            end
+        end)
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        end)
+    elseif toolName == "Con View" then
+        if self.State.UI and self.State.UI.ScreenGui then
+            for _, child in ipairs(self.State.UI.ScreenGui:GetChildren()) do
+                if child.Name:match("Window$") and child ~= self.State.UI.Main then
+                    child:Destroy()
+                end
+            end
+        end
+        local popup = Instance.new("Frame", self.State.UI.ScreenGui)
+        popup.Name             = "Con ViewWindow"
+        popup.Size             = UDim2.fromOffset(680, 440)
+        popup.Position         = UDim2.new(0.5, -340, 0.5, -220)
+        popup.BackgroundColor3 = self.Config.BG_PANEL
+        popup.BorderSizePixel  = 0
+        popup.ZIndex           = 100
+        self:_createBorder(popup, false)
+        local titleBar = Instance.new("Frame", popup)
+        titleBar.Size             = UDim2.new(1, -2, 0, 24)
+        titleBar.Position         = UDim2.fromOffset(1, 1)
+        titleBar.BackgroundColor3 = self.Config.ACCENT_BLUE
+        titleBar.BorderSizePixel  = 0
+        titleBar.ZIndex           = 101
+        local grad = Instance.new("UIGradient", titleBar)
+        grad.Color    = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 0, 120)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 60, 200)),
+        }
+        grad.Rotation = 90
+        local titleL = Instance.new("TextLabel", titleBar)
+        titleL.Size             = UDim2.new(1, -50, 1, 0)
+        titleL.Position         = UDim2.fromOffset(4, 0)
+        titleL.Text             = "Connection Viewer  —  getconnections() inspector"
+        titleL.TextColor3       = self.Config.BG_WHITE
+        titleL.Font             = Enum.Font.SourceSansBold
+        titleL.TextSize         = 12
+        titleL.TextXAlignment   = Enum.TextXAlignment.Left
+        titleL.BackgroundTransparency = 1
+        titleL.ZIndex           = 102
+        local closeBtn = self:_createButton(titleBar, "×", UDim2.fromOffset(20, 20), UDim2.new(1, -22, 0, 2), function()
+            popup:Destroy()
+        end)
+        closeBtn.ZIndex    = 103
+        closeBtn.TextSize  = 16
+        closeBtn.Font      = Enum.Font.SourceSansBold
+        closeBtn.BackgroundColor3 = self.Config.BG_LIGHT
+        local contentArea = Instance.new("Frame", popup)
+        contentArea.Size             = UDim2.new(1, -8, 1, -32)
+        contentArea.Position         = UDim2.fromOffset(4, 28)
+        contentArea.BackgroundColor3 = self.Config.BG_PANEL
+        contentArea.BorderSizePixel  = 0
+        contentArea.ZIndex           = 100
+        self:CreateConnectionViewerUI(contentArea)
+        local dragging, dragStart, startPos
+        titleBar.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true; dragStart = input.Position; startPos = popup.Position
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local d = input.Position - dragStart
+                popup.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+            end
+        end)
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        end)
+    else
+        _originalOpenToolWindow(self, toolName)
+    end
+end
+local _originalCreateUI = Modules.OverseerCE.CreateUI
+function Modules.OverseerCE:CreateUI()
+    _originalCreateUI(self)
+    task.defer(function()
+        if not self.State.UI or not self.State.UI.ScreenGui then return end
+        local main = self.State.UI.Main
+        if not main then return end
+        local menuBar = nil
+        local content = main:FindFirstChild("Frame")
+        for _, child in ipairs(main:GetDescendants()) do
+            if child:IsA("Frame") and child.Size.Y.Offset == 22 then
+                local hasBtn = false
+                for _, c in ipairs(child:GetChildren()) do
+                    if c:IsA("TextButton") then hasBtn = true; break end
+                end
+                if hasBtn then menuBar = child; break end
+            end
+        end
+        if not menuBar then return end
+        local maxX = 0
+        for _, child in ipairs(menuBar:GetChildren()) do
+            if child:IsA("TextButton") then
+                local rEdge = child.Position.X.Offset + child.Size.X.Offset
+                if rEdge > maxX then maxX = rEdge end
+            end
+        end
+        local function addMenuBtn(label, x)
+            local btn = self:_createButton(
+                menuBar,
+                label,
+                UDim2.fromOffset(69, 20),
+                UDim2.fromOffset(x, 2),
+                function() self:OpenToolWindow(label) end
+            )
+            btn.TextSize = 11
+            btn.Size     = UDim2.fromOffset(69, 20)
+            return btn
+        end
+        addMenuBtn("Rem Spy",  maxX + 2)
+        addMenuBtn("Con View", maxX + 73)
+    end)
+end
 Modules.OverseerCE:Initialize()
 return Modules.OverseerCE
